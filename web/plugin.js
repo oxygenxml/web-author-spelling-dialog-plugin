@@ -40,18 +40,19 @@
    goog.events.listen(editor, sync.api.Editor.EventTypes.ACTIONS_LOADED, function(e) {
      var actionsConfig = e.actionsConfiguration;
 
-     var moreToolbar = null;
+     var builtinToolbar = null;
      if (actionsConfig.toolbars) {
        for (var i = 0; i < actionsConfig.toolbars.length; i++) {
          var toolbar = actionsConfig.toolbars[i];
-         if (toolbar.name == "More...") {
-           moreToolbar = toolbar;
+         console.log(toolbar.name)
+         if (toolbar.name == "Builtin") {
+           builtinToolbar = toolbar;
          }
        }
      }
 
-     if (moreToolbar) {
-       moreToolbar.children.push({
+     if (builtinToolbar) {
+       builtinToolbar.children.push({
          id: actionId,
          type: "action"
        });
