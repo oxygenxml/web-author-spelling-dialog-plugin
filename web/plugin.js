@@ -28,8 +28,10 @@
  SpellcheckAction.prototype.actionPerformed = function(callback) {
    this.editor.getActionsManager().invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
-   }, function() {
-     console.log(arguments);
+     'fromCaret' : true,
+   }, function(err, resultString) {
+	   var result = JSON.parse(resultString);
+	   console.log(result)
      callback && callback();
    });
 

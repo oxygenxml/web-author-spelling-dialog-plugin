@@ -3,7 +3,7 @@
 <!DOCTYPE plugin SYSTEM "../plugin.dtd">
 
 <plugin
-    class="ro.sync.exml.plugin.Plugin"
+    class="com.oxygenxml.webapp.plugins.spellcheck.Plugin"
     id="web-author-spellcheck-plugin"
     name="Web Author Sepllcheck Plugin"
     description="Plugin that provides a spellchecking dialog."

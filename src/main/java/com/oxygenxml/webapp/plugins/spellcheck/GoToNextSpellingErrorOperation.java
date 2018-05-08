@@ -1,11 +1,14 @@
 package com.oxygenxml.webapp.plugins.spellcheck;
         
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import javax.swing.text.BadLocationException;
+
+import org.codehaus.jackson.map.ObjectMapper;
+
+import com.google.common.collect.ImmutableMap;
 
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
@@ -27,7 +30,6 @@ import ro.sync.exml.workspace.api.util.TextChunkDescriptor;
  */
 @WebappRestSafe
 public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
-
   /**
    * Attribute name for the start position of the last spelling error.
    */
@@ -41,38 +43,52 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
   @Override
   public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args)
       throws IllegalArgumentException, AuthorOperationException {
+    boolean fromCaret = (Boolean)args.getArgumentValue("fromCaret");
     WebappSpellchecker spellchecker = docModel.getSpellchecker();
-
-    SpellCheckingProblemInfo nextProblem = findNextProblem(docModel);
+    
+    SpellCheckingProblemInfo nextProblem = findNextProblem(docModel, fromCaret);
     
     saveCurrentProblem(docModel, nextProblem);
     
     // Select the next spelling error.
     docModel.getSelectionModel().setSelection(
-        nextProblem.getStartOffset(), nextProblem.getEndOffset());
+        nextProblem.getStartOffset(), nextProblem.getEndOffset() + 1);
     
     String[] suggestions = findSuggestions(spellchecker, nextProblem);
     
-    // TODO: Serialize the result to send.
-    return nextProblem.getWord() + "," + Arrays.asList(suggestions);
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      return objectMapper.writeValueAsString(ImmutableMap.of(
+          "word", nextProblem.getWord(),
+          "suggestions", suggestions));
+    } catch (IOException e) {
+      throw new AuthorOperationException(e.getMessage(), e);
+    }
   }
 
   /**
    * Save the position of the current spelling error.
    * 
    * @param docModel The document model.
+   * @param fromCaret <code>true</code> to return the next problem from the caret position
+   * rather than the last position marked.
    * 
    * @return
    * @throws AuthorOperationException
    */
-  //TODO: start from the caret position.
-  private SpellCheckingProblemInfo findNextProblem(AuthorDocumentModel docModel)
+  private SpellCheckingProblemInfo findNextProblem(AuthorDocumentModel docModel, boolean fromCaret)
       throws AuthorOperationException {
-    
     WebappSpellchecker spellchecker = docModel.getSpellchecker();
+    int caretOffset = docModel.getSelectionModel().getCaretOffset();
     AuthorDocument document = docModel.getAuthorDocumentController().getAuthorDocumentNode();
-    List<TextChunkDescriptor> textDescriptors = 
-        spellchecker.getTextDescriptors(document.getStartOffset(), document.getEndOffset());
+    List<TextChunkDescriptor> textDescriptors;
+    
+    //TODO: start from the caret position or from last position.
+    if (fromCaret) {
+      textDescriptors = spellchecker.getTextDescriptors(caretOffset, document.getEndOffset());
+    } else {
+      textDescriptors = spellchecker.getTextDescriptors(document.getStartOffset(), document.getEndOffset());
+    }
     
     SpellCheckingProblemInfo nextProblem = null;
     for (TextChunkDescriptor textDescriptor : textDescriptors) {
@@ -108,7 +124,6 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
           controller.createPositionInContent(currentProblem.getStartOffset()));
       editingContext.setAttribute(END_POS_ATTR_NAME, 
           controller.createPositionInContent(currentProblem.getEndOffset()));
-      // TODO: dispose positions
     } catch (BadLocationException e) {
       throw new AuthorOperationException(e.getMessage(), e);
     }
