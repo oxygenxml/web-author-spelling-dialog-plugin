@@ -182,11 +182,11 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
           continue;
         }
         for (SpellCheckingProblemInfo problem : problems) {
-          if (problem.getStartOffset() >= start && problem.getEndOffset() <= end) {
+          if (problem.getStartOffset() >= start && problem.getStartOffset() <= end) {
             return problem;
           } else {
-            // We might just found a truncated word at the end or start of the interval. 
-            // It will be found again in the next overlapping interval.  
+            // The given word does not start in our interval. 
+            // It will be found again in the next interval.  
           }
         }
       } catch (IOException e) {
