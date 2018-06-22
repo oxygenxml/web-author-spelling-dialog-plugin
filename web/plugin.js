@@ -30,6 +30,13 @@
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
      'fromCaret' : true,
    }, function(err, resultString) {
+     var selectedNode = window.getSelection().focusNode;
+     if (selectedNode) {
+       if (selectedNode.nodeType === 3) {
+         selectedNode = selectedNode.parentNode;
+       }
+       selectedNode.scrollIntoView();
+     }
 	   var result = JSON.parse(resultString);
 	   console.log(result)
      callback && callback();
