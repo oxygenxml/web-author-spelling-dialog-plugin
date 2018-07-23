@@ -6,7 +6,7 @@
 
   <groupId>com.oxygenxml</groupId>
   <artifactId>web-author-spellcheck-plugin</artifactId>
-  <version>20.1-SNAPSHOT</version>
+  <version>21.0-SNAPSHOT</version>
 
   <properties>
     <oxygen.sdk.version>20.0.0.0</oxygen.sdk.version>
@@ -111,5 +111,34 @@
       </plugin>
     </plugins>
 
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <versionRange>[1.10,)</versionRange>
+                    <goals>
+                      <goal>regex-property</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>

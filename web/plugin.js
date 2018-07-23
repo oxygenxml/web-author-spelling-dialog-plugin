@@ -26,7 +26,8 @@
 
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
-   this.editor.getActionsManager().invokeOperation(
+   var actionsManager = this.editor.getActionsManager(); 
+   actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
      'fromCaret' : true,
    }, function(err, resultString) {
@@ -35,10 +36,18 @@
        if (selectedNode.nodeType === 3) {
          selectedNode = selectedNode.parentNode;
        }
-       selectedNode.scrollIntoView();
+       var rect = selectedNode.getBoundingClientRect() || {};
+       // If the selected node is hidden, try to toggle the current fold.
+       if (rect.height === 0) {
+         actionsManager.getActionById('Author/ToggleFold').actionPerformed(function() {
+           selectedNode.scrollIntoView();
+         })
+       } else {
+         selectedNode.scrollIntoView();
+       }
      }
 	   var result = JSON.parse(resultString);
-	   console.log(result)
+	   console.log(result);
      callback && callback();
    });
 
