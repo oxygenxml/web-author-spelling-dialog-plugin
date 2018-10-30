@@ -30,6 +30,7 @@
    actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
      'fromCaret' : true,
+     'ignoredWords': this.editor.getSpellChecker().getIgnoredWords()
    }, function(err, resultString) {
      var selectedNode = window.getSelection().focusNode;
      if (selectedNode) {
