@@ -64,7 +64,7 @@
          this.wordInput_.value = word;
        }
        var suggestions = result.suggestions;
-       if (suggestions) {
+       if (suggestions && suggestions.length) {
          this.displaySuggestions_(suggestions);
        }
     }, this));
@@ -73,10 +73,35 @@
  SpellcheckAction.prototype.displaySuggestions_ = function (suggestions) {
    var suggestionElements = [];
    for (var i = 0; i < suggestions.length; i++) {
-      suggestionElements.push(goog.dom.createDom('div', '', suggestions[i]));
+      suggestionElements.push(goog.dom.createDom('div', 'man-sp-suggestion', suggestions[i]));
    }
+   // First suggestion gets added to the replace input, also marked as selected.
+   this.replaceInput_.value = suggestions[0];
+   goog.dom.classlist.add(suggestionElements[0], 'man-sp-selected');
+
    goog.dom.removeChildren(this.suggestionsBox_);
    goog.dom.append(this.suggestionsBox_, suggestionElements);
+ };
+
+  /**
+   * If the user clicked on a suggestion, mark it as selected and set its value to the replace input.
+   * @param e The click event.
+   * @private
+   */
+ SpellcheckAction.prototype.clickedOnSuggestion_ = function (e) {
+   var suggestionClass = 'man-sp-suggestion';
+   var selectedClass = 'man-sp-selected';
+   var target = goog.dom.getAncestorByClass(e.target, suggestionClass);
+   if (target) {
+     var currentlySelected = document.getElementsByClassName(selectedClass);
+     for (var i = 0; i < currentlySelected.length; i++) {
+       if (currentlySelected[i].textContent !== target.textContent) {
+         goog.dom.classlist.remove(currentlySelected[i], selectedClass);
+       }
+     }
+     goog.dom.classlist.add(target, selectedClass);
+     this.replaceInput_.value = target.textContent;
+   }
  };
 
   SpellcheckAction.prototype.showDialog_ = function () {
@@ -91,6 +116,7 @@
       var createDom = goog.dom.createDom;
 
       this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text'});
+      this.replaceInput_ = createDom('input', { id: 'man-sp-replace-with', className: 'man-sp-input', type: 'text' });
       this.suggestionsBox_ = createDom('div', {
           id: 'man-sp-suggestions',
           style: 'border: 1px solid lightgray;'
@@ -103,7 +129,7 @@
           this.wordInput_,
 
           createDom('label', { className: 'man-sp-label', for: 'man-sp-replace-with' }, 'Replace with'/*tr(msgs.REPLACE_WITH_)*/ + ':'),
-          createDom('input', { id: 'man-sp-replace-with', className: 'man-sp-input', type: 'text' }),
+          this.replaceInput_,
 
           createDom('label', {
             className: 'man-sp-label',
@@ -126,6 +152,8 @@
         inputsColumn,
         buttonsColumn
       );
+
+      goog.events.listen(this.suggestionsBox_, goog.events.EventType.CLICK, goog.bind(this.clickedOnSuggestion_, this));
 
       this.dialog_ = dialog;
     }

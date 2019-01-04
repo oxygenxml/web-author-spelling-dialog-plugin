@@ -1,7 +1,6 @@
 package com.oxygenxml.webapp.plugins.spellcheck;
         
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Optional;
 
 import javax.swing.text.BadLocationException;

@@ -1,0 +1,43 @@
+.man-sp-label {
+  display: block;
+}
+#manual-spellcheck-container {
+  display: flex;
+}
+
+.man-sp {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+#man-sp-suggestions {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+.man-sp-col.man-inputs {
+  flex-grow: 1;
+}
+
+.man-sp-suggestion {
+  padding-left: 10px;
+}
+
+.man-sp-selected {
+  background-color: #d8e2ea;
+}
+
+.man-sp-button {
+  border: 1px solid #C8C1C1; /* same grey as modal dialog buttons border. */
+  border-radius: 4px;
+  padding: 5px 10px;
+  margin: 0 0 15px 10px;
+  cursor: pointer;
+  background-color: #fbfbfb;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+}
+.man-sp-button:hover, .man-sp-button:active {
+  background-color: lightgray;
+}
