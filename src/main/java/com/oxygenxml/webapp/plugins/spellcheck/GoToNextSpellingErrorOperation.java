@@ -1,6 +1,7 @@
 package com.oxygenxml.webapp.plugins.spellcheck;
         
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
 import javax.swing.text.BadLocationException;
@@ -46,7 +47,7 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
 
   @Override
   public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args)
-      throws IllegalArgumentException, AuthorOperationException {
+      throws AuthorOperationException {
     String result = null;
     boolean fromCaret = (Boolean)args.getArgumentValue("fromCaret");
     IgnoredWords ignoredWords = 
@@ -65,7 +66,13 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
       docModel.getSelectionModel().setSelection(
           nextProblem.getStartOffset(), nextProblem.getEndOffset() + 1);
       
-      String[] suggestions = findSuggestions(spellchecker, nextProblem);
+      // Custom spell checker may provide suggestions with the problem info.
+      String[] suggestions;
+      if (nextProblem.getSuggestions() != null) {
+        suggestions = nextProblem.getSuggestions().toArray(new String[0]);
+      } else {
+        suggestions = findSuggestions(spellchecker, nextProblem);
+      }
       
       try {
         ObjectMapper objectMapper = new ObjectMapper();

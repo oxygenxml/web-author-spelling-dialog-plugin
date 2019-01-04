@@ -15,4 +15,5 @@
     <library name="target/classes" />
     <librariesFolder name="target/lib" />
   </runtime>
+  <extension type="WebappStaticResourcesFolder" path="resources/" href="man-sp/"/>
 </plugin>
