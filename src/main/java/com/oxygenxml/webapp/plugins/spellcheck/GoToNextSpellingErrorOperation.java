@@ -77,6 +77,9 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
         ObjectMapper objectMapper = new ObjectMapper();
         result = objectMapper.writeValueAsString(ImmutableMap.of(
             "word", nextProblem.getWord(),
+            "language", nextProblem.getLanguageIsoName(),
+            "startOffset", nextProblem.getStartOffset(),
+            "endOffset", nextProblem.getEndOffset(),
             "suggestions", suggestions));
       } catch (IOException e) {
         throw new AuthorOperationException(e.getMessage(), e);

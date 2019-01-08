@@ -8,6 +8,8 @@
   goog.dom.appendChild(document.head, cssFile);
 
   console.log('manual spellcheck plugin loaded successfully');
+
+  var selectedMarkerClass = 'spelling-selected';
  goog.events.listenOnce(workspace, sync.api.Workspace.EventType.BEFORE_EDITOR_LOADED,
      function(e) {
    var editor = e.editor;
@@ -41,7 +43,17 @@
        'fromCaret' : true,
        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
      }, goog.bind(function(err, resultString) {
+       var previouslySelected = document.querySelectorAll('.' + selectedMarkerClass);
+       for (var j = 0; j < previouslySelected.length; j++) {
+          goog.dom.classlist.remove(previouslySelected[j], selectedMarkerClass);
+       }
+
        var selectedNode = window.getSelection().focusNode;
+
+       var markerAncestor = goog.dom.getAncestorByClass(window.getSelection().baseNode, 'spellcheckingError');
+       if (markerAncestor) {
+         goog.dom.classlist.add(markerAncestor, selectedMarkerClass);
+       }
        if (selectedNode) {
          if (selectedNode.nodeType === 3) {
            selectedNode = selectedNode.parentNode;
@@ -62,6 +74,12 @@
        var word = result.word;
        if (word) {
          this.wordInput_.value = word;
+
+         this.word_ = word;
+         this.language_ = result.language;
+         this.suggestions_ = result.suggestions;
+         this.startOffset_ = result.startOffset;
+         this.endOffset_ = result.endOffset;
        }
        var suggestions = result.suggestions;
        if (suggestions && suggestions.length) {
@@ -107,15 +125,16 @@
   SpellcheckAction.prototype.showDialog_ = function () {
     var dialog = this.dialog_;
     if (!dialog) {
-      dialog = workspace.createDialog('spellcheck', true);
-      dialog.setPreferredSize(450, 500);
+      dialog = workspace.createDialog('manual-spellcheck', true);
+      dialog.setPreferredSize(320, 420);
       dialog.setTitle('Spelling'/*msgs.SPELLING_*/);
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
 
       var createDom = goog.dom.createDom;
 
-      this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text'});
+      this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text' });
+      this.wordInput_.setAttribute('readonly', 'true');
       this.replaceInput_ = createDom('input', { id: 'man-sp-replace-with', className: 'man-sp-input', type: 'text' });
       this.suggestionsBox_ = createDom('div', {
           id: 'man-sp-suggestions',
@@ -138,11 +157,17 @@
           this.suggestionsBox_
         )
       );
+      var ignoreButton = createDom('div', 'man-sp-button', 'Ignore'); //todo: translate 'em /*tr(msgs.IGNORE_)*/
+      var ignoreAllButton = createDom('div', 'man-sp-button' , 'Ignore All');
+      var replaceButton = createDom('div', 'man-sp-button' , 'Replace');
+      var replaceAllButton = createDom('div', 'man-sp-button' , 'Replace All');
+
+
       var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
-        createDom('div', 'man-sp-button', 'Ignore'), //todo: translate 'em /*tr(msgs.IGNORE_)*/
-        createDom('div', 'man-sp-button' , 'Ignore All'),
-        createDom('div', 'man-sp-button' , 'Replace'),
-        createDom('div', 'man-sp-button' , 'Replace All')
+        ignoreButton,
+        ignoreAllButton,
+        replaceButton,
+        replaceAllButton
       );
 
       dialog.getElement().setAttribute('id', 'manual-spellcheck-container');
@@ -154,6 +179,44 @@
       );
 
       goog.events.listen(this.suggestionsBox_, goog.events.EventType.CLICK, goog.bind(this.clickedOnSuggestion_, this));
+      goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
+        var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
+        if (button) {
+          var buttonType = button.textContent; // todo: data-attribute.
+          if (buttonType === 'Ignore') {
+            // just go to next marker.
+          } else if (buttonType === 'Ignore All') {
+            var language = this.language_;
+            var word = this.word_;
+            // Add the word to the ignore list for the language.
+            this.editor_.getSpellChecker().addIgnoredWord(language, word);
+          } else if (buttonType === 'Replace') {
+            // todo: grab replace action non-api or just use the operation and not care?
+            var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
+              this.editor_.getController(),
+              this.startOffset_,
+              this.endOffset_,
+              this.word_,
+              this.replaceInput_.value);
+            replaceAction.actionPerformed();
+          } else if (buttonType === 'Replace All') {
+            //var allOccurrences = document.querySelectorAll('.spellcheckingError[data-spellcheck-word="' + this.word_ + '"][data-lang="' + this.language_ + '"]');
+            sync.rest.callAsync(RESTSpellChecker.suggestionReplaceAll, {
+              docId: this.editor_.getController().docId,
+              newWord: this.replaceInput_.value,
+              language: this.language_,
+
+              // SpellSugestionsInfo from the last spellchecking.
+              oldWord: this.word_,
+              startOffset: this.startOffset_,
+              endOffset: this.endOffset_
+            }).then(goog.bind(function (e) {
+              this.editor_.getController().applyUpdate_(e);
+            }, this));
+          }
+          this.findNext();
+        }
+      }, this));
 
       this.dialog_ = dialog;
     }

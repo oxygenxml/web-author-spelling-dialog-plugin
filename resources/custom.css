@@ -22,6 +22,9 @@
 .man-sp-suggestion {
   padding-left: 10px;
 }
+.man-sp-suggestion:hover:not(.man-sp-selected) {
+  background-color: #f2f8fd;
+}
 
 .man-sp-selected {
   background-color: #d8e2ea;
@@ -40,4 +43,13 @@
 }
 .man-sp-button:hover, .man-sp-button:active {
   background-color: lightgray;
+}
+
+#manual-spellcheck .modal-dialog-content{
+  padding-bottom: 30px;
+}
+
+.spelling-selected {
+  background-color: #5077e0;
+  color: white;
 }
