@@ -126,7 +126,7 @@
     var dialog = this.dialog_;
     if (!dialog) {
       dialog = workspace.createDialog('manual-spellcheck', true);
-      dialog.setPreferredSize(320, 420);
+      dialog.setPreferredSize(380, 480);
       dialog.setTitle('Spelling'/*msgs.SPELLING_*/);
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
@@ -178,6 +178,16 @@
         buttonsColumn
       );
 
+      var getErrorPosition = function () {
+        var selection = sync.select.getSelection();
+        // todo: Show a warning if the selected result is in a read-only part of the document.
+        // Maybe just ignore it in results altogether.
+        /*if (sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent)) {
+          return null;
+        }*/
+        return selection.start.toRelativeContentPosition();
+      };
+
       goog.events.listen(this.suggestionsBox_, goog.events.EventType.CLICK, goog.bind(this.clickedOnSuggestion_, this));
       goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
         var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
@@ -194,22 +204,20 @@
             // todo: grab replace action non-api or just use the operation and not care?
             var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
               this.editor_.getController(),
-              this.startOffset_,
-              this.endOffset_,
+              -1,
+              -1,
               this.word_,
-              this.replaceInput_.value);
+              this.replaceInput_.value,
+              getErrorPosition()
+            );
             replaceAction.actionPerformed();
           } else if (buttonType === 'Replace All') {
-            //var allOccurrences = document.querySelectorAll('.spellcheckingError[data-spellcheck-word="' + this.word_ + '"][data-lang="' + this.language_ + '"]');
-            sync.rest.callAsync(RESTSpellChecker.suggestionReplaceAll, {
+            sync.rest.callAsync(RESTFindReplaceSupport.replaceAllInDocument, {
               docId: this.editor_.getController().docId,
-              newWord: this.replaceInput_.value,
-              language: this.language_,
-
-              // SpellSugestionsInfo from the last spellchecking.
-              oldWord: this.word_,
-              startOffset: this.startOffset_,
-              endOffset: this.endOffset_
+              textToFind: this.word_,
+              textToReplace: this.replaceInput_.value,
+              matchCase: true,
+              wholeWords: true
             }).then(goog.bind(function (e) {
               this.editor_.getController().applyUpdate_(e);
             }, this));
