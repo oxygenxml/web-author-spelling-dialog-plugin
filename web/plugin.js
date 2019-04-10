@@ -27,13 +27,17 @@
    sync.actions.AbstractAction.call(this, 'M1 F7');
    this.editor_ = editor;
    this.dialog_ = null;
+
+   this.wordInput_ = null;
+   this.replaceInput_ = null;
+   this.suggestionsBox_ = null;
  };
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
  SpellcheckAction.prototype.constructor = SpellcheckAction;
 
  SpellcheckAction.prototype.getDisplayName = function() {
-   return 'Spellcheck';
+   return tr(msgs.SPELL_CHECK_);
  };
 
  SpellcheckAction.prototype.findNext = function () {
@@ -91,76 +95,82 @@
  SpellcheckAction.prototype.displaySuggestions_ = function (suggestions) {
    var suggestionElements = [];
    for (var i = 0; i < suggestions.length; i++) {
-      suggestionElements.push(goog.dom.createDom('div', 'man-sp-suggestion', suggestions[i]));
+      suggestionElements.push(goog.dom.createDom('option', 'man-sp-suggestion', suggestions[i]));
    }
    // First suggestion gets added to the replace input, also marked as selected.
    this.replaceInput_.value = suggestions[0];
-   goog.dom.classlist.add(suggestionElements[0], 'man-sp-selected');
+   /*goog.dom.classlist.add(suggestionElements[0], 'man-sp-selected');*/
+   suggestionElements[0].setAttribute('selected', 'selected');
 
    goog.dom.removeChildren(this.suggestionsBox_);
    goog.dom.append(this.suggestionsBox_, suggestionElements);
  };
 
   /**
-   * If the user clicked on a suggestion, mark it as selected and set its value to the replace input.
-   * @param e The click event.
+   * If the user clicked on a suggestion, set its value to the replace input.
    * @private
    */
- SpellcheckAction.prototype.clickedOnSuggestion_ = function (e) {
-   var suggestionClass = 'man-sp-suggestion';
-   var selectedClass = 'man-sp-selected';
-   var target = goog.dom.getAncestorByClass(e.target, suggestionClass);
-   if (target) {
-     var currentlySelected = document.getElementsByClassName(selectedClass);
-     for (var i = 0; i < currentlySelected.length; i++) {
-       if (currentlySelected[i].textContent !== target.textContent) {
-         goog.dom.classlist.remove(currentlySelected[i], selectedClass);
-       }
-     }
-     goog.dom.classlist.add(target, selectedClass);
-     this.replaceInput_.value = target.textContent;
-   }
+ SpellcheckAction.prototype.suggestionSelected_ = function () {
+   this.replaceInput_.value = this.suggestionsBox_.value;
  };
 
+ SpellcheckAction.prototype.beforeHide_ = function () {
+   var fakeSpellcheckingSelections = document.querySelectorAll('.' + selectedMarkerClass);
+   for (var j = 0; j < fakeSpellcheckingSelections.length; j++) {
+     goog.dom.classlist.remove(fakeSpellcheckingSelections[j], selectedMarkerClass);
+   }
+ };
   SpellcheckAction.prototype.showDialog_ = function () {
     var dialog = this.dialog_;
     if (!dialog) {
       dialog = workspace.createDialog('manual-spellcheck', true);
       dialog.setPreferredSize(380, 480);
-      dialog.setTitle('Spelling'/*msgs.SPELLING_*/);
+      dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
+
+      var spDialogEventTarget = dialog.getEventTarget();
+      goog.events.listen(spDialogEventTarget, goog.ui.PopupBase.EventType.BEFORE_HIDE, goog.bind(this.beforeHide_, this));
+      //this.eventHandler_.listen()
 
       var createDom = goog.dom.createDom;
 
       this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text' });
       this.wordInput_.setAttribute('readonly', 'true');
       this.replaceInput_ = createDom('input', { id: 'man-sp-replace-with', className: 'man-sp-input', type: 'text' });
-      this.suggestionsBox_ = createDom('div', {
+      this.suggestionsBox_ = createDom('select', {
           id: 'man-sp-suggestions',
-          style: 'border: 1px solid lightgray;'
+          size: 6
         }
       );
 
+      var createLabel = function (inputElement, caption) {
+        return goog.dom.createDom('label', { className: 'man-sp-label' },
+          caption + ':',
+          inputElement
+        )
+      };
+
+      var suggestionsLabel = createLabel(null, tr(msgs.SUGGESTIONS_));
+      suggestionsLabel.setAttribute('for', 'man-sp-suggestions');
       var inputsColumn = createDom('div', 'man-sp-col man-inputs',
         createDom('div', 'man-sp',
-          createDom('label', { className: 'man-sp-label', for: 'man-sp-word' }, 'Word'/*tr(msgs.WORD_)*/ + ':'),
-          this.wordInput_,
-
-          createDom('label', { className: 'man-sp-label', for: 'man-sp-replace-with' }, 'Replace with'/*tr(msgs.REPLACE_WITH_)*/ + ':'),
-          this.replaceInput_,
-
-          createDom('label', {
-            className: 'man-sp-label',
-            for: 'man-sp-suggestions'
-          }, 'Suggestions'/*tr(msgs.SUGGESTIONS_)*/ + ':'),
+          createLabel(this.wordInput_, tr(msgs.WORD_)),
+          createLabel(this.replaceInput_, tr(msgs.REPLACE_WITH_)),
+          suggestionsLabel,
           this.suggestionsBox_
         )
       );
-      var ignoreButton = createDom('div', 'man-sp-button', 'Ignore'); //todo: translate 'em /*tr(msgs.IGNORE_)*/
-      var ignoreAllButton = createDom('div', 'man-sp-button' , 'Ignore All');
-      var replaceButton = createDom('div', 'man-sp-button' , 'Replace');
-      var replaceAllButton = createDom('div', 'man-sp-button' , 'Replace All');
+
+      var createButton = function (name, caption) {
+        var button = goog.dom.createDom('button', { className: 'man-sp-button ' }, caption);
+        goog.dom.dataset.set(button, 'spButton', name);
+        return button;
+      };
+      var ignoreButton = createButton('ignore', tr(msgs.IGNORE_));
+      var ignoreAllButton = createButton('ignore_all', tr(msgs.IGNORE_ALL_));
+      var replaceButton = createButton('replace', tr(msgs.REPLACE_));
+      var replaceAllButton = createButton('replaceall', tr(msgs.REPLACE_ALL_));
 
 
       var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
@@ -188,19 +198,19 @@
         return selection.start.toRelativeContentPosition();
       };
 
-      goog.events.listen(this.suggestionsBox_, goog.events.EventType.CLICK, goog.bind(this.clickedOnSuggestion_, this));
+      goog.events.listen(this.suggestionsBox_, goog.events.EventType.CHANGE, goog.bind(this.suggestionSelected_, this));
       goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
         var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
         if (button) {
-          var buttonType = button.textContent; // todo: data-attribute.
-          if (buttonType === 'Ignore') {
+          var buttonType = goog.dom.dataset.get(button, 'spButton');
+          if (buttonType === 'ignore') {
             // just go to next marker.
-          } else if (buttonType === 'Ignore All') {
+          } else if (buttonType === 'ignore_all') {
             var language = this.language_;
             var word = this.word_;
             // Add the word to the ignore list for the language.
             this.editor_.getSpellChecker().addIgnoredWord(language, word);
-          } else if (buttonType === 'Replace') {
+          } else if (buttonType === 'replace') {
             // todo: grab replace action non-api or just use the operation and not care?
             var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
               this.editor_.getController(),
@@ -211,7 +221,7 @@
               getErrorPosition()
             );
             replaceAction.actionPerformed();
-          } else if (buttonType === 'Replace All') {
+          } else if (buttonType === 'replace_all') {
             sync.rest.callAsync(RESTFindReplaceSupport.replaceAllInDocument, {
               docId: this.editor_.getController().docId,
               textToFind: this.word_,

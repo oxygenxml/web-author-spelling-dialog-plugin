@@ -1,0 +1,29 @@
+{
+  "name": "manual-spellcheck",
+  "version": "0.0.1",
+  "description": "This plugin adds a spellchecking dialog to Oxygen XML Web Author.",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreip1123/web-author-spellcheck-plugin.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/andreip1123/web-author-spellcheck-plugin/issues"
+  },
+  "homepage": "https://github.com/andreip1123/web-author-spellcheck-plugin#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-convert": "^0.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.5.3",
+    "gulp-sort": "2.0.0",
+    "gulp-iife": "0.3.0",
+    "sync-i18n": "0.0.x"
+  }
+}

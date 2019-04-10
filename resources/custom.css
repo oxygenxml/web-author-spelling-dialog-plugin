@@ -1,6 +1,17 @@
 .man-sp-label {
   display: block;
 }
+
+.man-sp-input {
+  display: block;
+  width: 100%;
+}
+
+.man-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
 #manual-spellcheck-container {
   display: flex;
 }
@@ -20,13 +31,13 @@
 }
 
 .man-sp-suggestion {
-  padding-left: 10px;
+  padding: 5px 0 5px 10px;
 }
 .man-sp-suggestion:hover:not(.man-sp-selected) {
   background-color: #f2f8fd;
 }
 
-.man-sp-selected {
+.man-sp-suggestion:checked {
   background-color: #d8e2ea;
 }
 

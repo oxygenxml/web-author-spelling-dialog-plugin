@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translation>
+    <languageList>
+        <language description="English" lang="en_US"/>
+        <language description="German" lang="de_DE"/>
+        <language description="French" lang="fr_FR"/>
+        <language description="Japanese" lang="ja_JP"/>
+        <language description="Dutch" lang="nl_NL"/>
+    </languageList>
+    <key value="WORD_">
+        <comment>Label for the currently selected word.</comment>
+        <val lang="en_US">Word</val>
+        <val lang="de_DE">Word</val>
+        <val lang="fr_FR">Word</val>
+        <val lang="ja_JP">Word</val>
+        <val lang="nl_NL">Word</val>
+    </key>
+    <key value="Replace_with">
+        <comment>Find/Replace dialog.</comment>
+        <val lang="en_US">Replace with</val>
+        <val lang="de_DE">Ersetzen durch</val>
+        <val lang="fr_FR">Remplacer par</val>
+        <val lang="ja_JP">置換後</val>
+        <val lang="nl_NL">Vervang door</val>
+    </key>
+    <key value="Suggestions">
+        <comment>Spell checker suggestions</comment>
+        <val lang="en_US">Suggestions</val>
+        <val lang="de_DE">Vorschläge</val>
+        <val lang="fr_FR">Suggestions</val>
+        <val lang="ja_JP">提案</val>
+        <val lang="nl_NL">Suggesties</val>
+    </key>
+    <!-- server-side tags must have the 'destination' attribute set -->
+    <key distribution="webauthor" value="SPELLING_">
+        <comment>Title of spell checking dialog.</comment>
+        <val lang="en_US">Spelling</val>
+        <val lang="de_DE">Rechtschreibung</val>
+        <val lang="fr_FR">Orthographe</val>
+        <val lang="ja_JP">スペル</val>
+        <val lang="nl_NL">Spelling</val>
+    </key>
+    <key distribution="common" value="Spell_Check">
+        <comment>Spell check option caption</comment>
+        <val lang="en_US" mnemonic="6">Spell &amp;Check</val>
+        <val lang="de_DE">Rechtschreibprüfung</val>
+        <val lang="fr_FR">Vérification orthographique</val>
+        <val lang="ja_JP">スペルチェック</val>
+        <val lang="nl_NL">Spellingcontrole</val>
+    </key>
+    <key value="Ignore">
+        <comment/>
+        <val lang="en_US">Ignore</val>
+        <val lang="de_DE">Ignorieren</val>
+        <val lang="fr_FR">Ignorer</val>
+        <val lang="ja_JP">無視</val>
+        <val lang="nl_NL">Negeer</val>
+    </key>
+    <key value="Ignore_All">
+        <comment>Spell dialog. If the same word is to be ignored in all its occurrences.</comment>
+        <val lang="en_US">Ignore All</val>
+        <val lang="de_DE">Alle ignorieren</val>
+        <val lang="fr_FR">Tout ignorer</val>
+        <val lang="ja_JP">すべて無視</val>
+        <val lang="nl_NL">Negeer alles</val>
+    </key>
+    <key value="Replace">
+        <comment/>
+        <val lang="en_US">Replace</val>
+        <val lang="de_DE">Ersetzen</val>
+        <val lang="fr_FR">Remplacer</val>
+        <val lang="ja_JP">置換</val>
+        <val lang="nl_NL">Vervang</val>
+    </key>
+    <key value="Replace_all">
+        <comment>Label of button "Replace all" in the find/replace in files dialog and title of
+            results panel. Only Chinese needed. </comment>
+        <val lang="en_US">Replace All</val>
+        <val lang="de_DE">Alle ersetzen</val>
+        <val lang="fr_FR">Tout remplacer</val>
+        <val lang="ja_JP">すべて置換</val>
+        <val lang="nl_NL">Vervang alles</val>
+    </key>
+</translation>
