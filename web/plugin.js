@@ -170,7 +170,7 @@
       var ignoreButton = createButton('ignore', tr(msgs.IGNORE_));
       var ignoreAllButton = createButton('ignore_all', tr(msgs.IGNORE_ALL_));
       var replaceButton = createButton('replace', tr(msgs.REPLACE_));
-      var replaceAllButton = createButton('replaceall', tr(msgs.REPLACE_ALL_));
+      var replaceAllButton = createButton('replace_all', tr(msgs.REPLACE_ALL_));
 
 
       var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
