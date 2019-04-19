@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andreip1123/web-author-spellcheck-plugin.git"
+    "url": "git+https://github.com/oxygenxml/web-author-spelling-dialog-plugin.git"
   },
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/andreip1123/web-author-spellcheck-plugin/issues"
+    "url": "https://github.com/oxygenxml/web-author-spelling-dialog-plugin/issues"
   },
-  "homepage": "https://github.com/andreip1123/web-author-spellcheck-plugin#readme",
+  "homepage": "https://github.com/oxygenxml/web-author-spelling-dialog-plugin#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",

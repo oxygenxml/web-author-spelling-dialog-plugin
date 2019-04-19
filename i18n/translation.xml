@@ -40,9 +40,9 @@
         <val lang="ja_JP">スペル</val>
         <val lang="nl_NL">Spelling</val>
     </key>
-    <key distribution="common" value="Spell_Check">
+    <key distribution="common" value="SPELL_CHECK_ACTION_">
         <comment>Spell check option caption</comment>
-        <val lang="en_US" mnemonic="6">Spell &amp;Check</val>
+        <val lang="en_US">Spell Check</val>
         <val lang="de_DE">Rechtschreibprüfung</val>
         <val lang="fr_FR">Vérification orthographique</val>
         <val lang="ja_JP">スペルチェック</val>

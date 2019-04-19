@@ -2,7 +2,7 @@
 A plugin for Oxygen XML Web Author that adds a spelling dialog.
 
 # Download
-You can download the CMIS plugin for Web Author from the [releases page](https://github.com/oxygenxml/web-author-spelling-dialog-plugin/releases).
+You can download the plugin from the [releases page](https://github.com/oxygenxml/web-author-spelling-dialog-plugin/releases).
 
 # Build
 

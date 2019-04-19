@@ -35,7 +35,7 @@
  SpellcheckAction.prototype.constructor = SpellcheckAction;
 
  SpellcheckAction.prototype.getDisplayName = function() {
-   return tr(msgs.SPELL_CHECK_);
+   return tr(msgs.SPELL_CHECK_ACTION_);
  };
 
  SpellcheckAction.prototype.findNext = function () {
