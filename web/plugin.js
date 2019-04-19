@@ -71,7 +71,6 @@
          }
        }
        var result = JSON.parse(resultString);
-       console.log(result);
 
        var word = result.word;
        if (word) {
