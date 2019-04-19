@@ -7,8 +7,6 @@
   cssFile.href = "../plugin-resources/man-sp/custom.css";
   goog.dom.appendChild(document.head, cssFile);
 
-  console.log('manual spellcheck plugin loaded successfully');
-
   var selectedMarkerClass = 'spelling-selected';
  goog.events.listenOnce(workspace, sync.api.Workspace.EventType.BEFORE_EDITOR_LOADED,
      function(e) {
