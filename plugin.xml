@@ -5,8 +5,8 @@
 <plugin
     class="com.oxygenxml.webapp.plugins.spellcheck.Plugin"
     id="web-author-spellcheck-plugin"
-    name="Web Author Sepllcheck Plugin"
-    description="Plugin that provides a spellchecking dialog."
+    name="Web Author Spelling Dialog Plugin"
+    description="A plugin for Oxygen XML Web Author that adds a spelling dialog."
     version="${project.nosnapshot.version}"
     vendor="SyncroSoft SRL">
 
