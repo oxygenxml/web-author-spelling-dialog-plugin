@@ -70,21 +70,29 @@
            selectedNode.scrollIntoView();
          }
        }
-       var result = JSON.parse(resultString);
+       var result;
+       try {
+         result = JSON.parse(resultString);
+       } catch (e) {
+         result = {};
+       }
 
        var word = result.word;
+       this.wordInput_.value = word || '';
        if (word) {
-         this.wordInput_.value = word;
-
          this.word_ = word;
          this.language_ = result.language;
          this.suggestions_ = result.suggestions;
          this.startOffset_ = result.startOffset;
          this.endOffset_ = result.endOffset;
-       }
-       var suggestions = result.suggestions;
-       if (suggestions && suggestions.length) {
-         this.displaySuggestions_(suggestions);
+         var suggestions = result.suggestions;
+         if (suggestions && suggestions.length) {
+           this.displaySuggestions_(suggestions);
+         }
+       } else {
+         this.replaceInput_.value = '';
+         goog.dom.removeChildren(this.suggestionsBox_);
+
        }
     }, this));
  };
@@ -152,7 +160,11 @@
       suggestionsLabel.setAttribute('for', 'man-sp-suggestions');
       var inputsColumn = createDom('div', 'man-sp-col man-inputs',
         createDom('div', 'man-sp',
-          createLabel(this.wordInput_, tr(msgs.WORD_)),
+          goog.dom.createDom('div', {style: 'position: relative;'},
+            goog.dom.createDom('label', { className: 'man-sp-label', for: 'man-sp-word' }, tr(msgs.WORD_) + ':')
+            /*goog.dom.createDom('span', 'man-sp-status', tr(msgs.NO_ERRORS_FOUND_))*/
+          ),
+          this.wordInput_,
           createLabel(this.replaceInput_, tr(msgs.REPLACE_WITH_)),
           suggestionsLabel,
           this.suggestionsBox_

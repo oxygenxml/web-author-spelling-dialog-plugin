@@ -7,6 +7,14 @@
         <language description="Japanese" lang="ja_JP"/>
         <language description="Dutch" lang="nl_NL"/>
     </languageList>
+    <key value="NO_ERRORS_FOUND_">
+        <comment>Message shown if there are no spelling errors in the document.</comment>
+        <val lang="en_US">No errors found.</val>
+        <val lang="de_DE">No errors found.</val>
+        <val lang="fr_FR">No errors found.</val>
+        <val lang="ja_JP">No errors found.</val>
+        <val lang="nl_NL">No errors found.</val>
+    </key>
     <key value="WORD_">
         <comment>Label for the currently selected word.</comment>
         <val lang="en_US">Word</val>
