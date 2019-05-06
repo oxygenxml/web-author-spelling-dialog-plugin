@@ -15,13 +15,13 @@
         <val lang="ja_JP">No errors found.</val>
         <val lang="nl_NL">No errors found.</val>
     </key>
-    <key value="WORD_">
-        <comment>Label for the currently selected word.</comment>
-        <val lang="en_US">Word</val>
-        <val lang="de_DE">Word</val>
-        <val lang="fr_FR">Word</val>
-        <val lang="ja_JP">Word</val>
-        <val lang="nl_NL">Word</val>
+    <key value="MISSPELLED_WORD_">
+        <comment>Spelling highlight</comment>
+        <val lang="en_US">Misspelled word</val>
+        <val lang="de_DE">Falsch geschriebenes Wort</val>
+        <val lang="fr_FR">Mot mal orthographié</val>
+        <val lang="ja_JP">スペリングの誤りのある単語</val>
+        <val lang="nl_NL">Verkeerd gespeld woord</val>
     </key>
     <key value="Replace_with">
         <comment>Find/Replace dialog.</comment>

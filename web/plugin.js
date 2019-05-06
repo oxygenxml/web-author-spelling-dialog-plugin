@@ -161,7 +161,7 @@
       var inputsColumn = createDom('div', 'man-sp-col man-inputs',
         createDom('div', 'man-sp',
           goog.dom.createDom('div', {style: 'position: relative;'},
-            goog.dom.createDom('label', { className: 'man-sp-label', for: 'man-sp-word' }, tr(msgs.WORD_) + ':')
+            goog.dom.createDom('label', { className: 'man-sp-label', for: 'man-sp-word' }, tr(msgs.MISSPELLED_WORD_) + ':')
             /*goog.dom.createDom('span', 'man-sp-status', tr(msgs.NO_ERRORS_FOUND_))*/
           ),
           this.wordInput_,
