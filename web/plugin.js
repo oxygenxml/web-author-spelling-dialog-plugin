@@ -34,6 +34,14 @@
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
  SpellcheckAction.prototype.constructor = SpellcheckAction;
 
+ SpellcheckAction.prototype.getLargeIcon = function () {
+   return sync.util.computeHdpiIcon('../plugin-resources/man-sp/SpellCheck24.png');
+ };
+
+  SpellcheckAction.prototype.getDescription = function() {
+    return tr(msgs.SPELL_CHECK_ACTION_);
+  };
+
  SpellcheckAction.prototype.getDisplayName = function() {
    return tr(msgs.SPELL_CHECK_ACTION_);
  };
@@ -274,10 +282,11 @@
      }
 
      if (builtinToolbar) {
-       builtinToolbar.children.push({
+       var moreElement = goog.array.find(builtinToolbar.children, function (el) { return el.name === 'More...' });
+       goog.array.insertBefore(builtinToolbar.children, {
          id: actionId,
          type: "action"
-       });
+       }, moreElement);
      }
    });
  }
