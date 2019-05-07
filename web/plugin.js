@@ -22,7 +22,7 @@
   * The action that shows a popup and then inserts the text in the pop-up.
   */
  var SpellcheckAction = function(editor) {
-   sync.actions.AbstractAction.call(this, 'M1 F7');
+   sync.actions.AbstractAction.call(this, 'F7');
    this.editor_ = editor;
    this.dialog_ = null;
 
