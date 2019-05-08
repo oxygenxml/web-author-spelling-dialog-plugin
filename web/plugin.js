@@ -21,7 +21,7 @@
  /**
   * The action that shows a popup and then inserts the text in the pop-up.
   */
- var SpellcheckAction = function(editor) {
+ function SpellcheckAction (editor) {
    sync.actions.AbstractAction.call(this, 'F7');
    this.editor_ = editor;
    this.dialog_ = null;
@@ -29,7 +29,16 @@
    this.wordInput_ = null;
    this.replaceInput_ = null;
    this.suggestionsBox_ = null;
- };
+
+   this.errorReporter_ = null;
+   this.eventHandler_ = new goog.events.EventHandler(this);
+
+   this.lastDialogPosition_ = null;
+   this.lastDialogSize_ = null;
+
+   this.dialogWidth_ = 350;
+   this.dialogHeight_ = 340;
+ }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
  SpellcheckAction.prototype.constructor = SpellcheckAction;
@@ -137,7 +146,7 @@
     var dialog = this.dialog_;
     if (!dialog) {
       dialog = workspace.createDialog('manual-spellcheck', true);
-      dialog.setPreferredSize(380, 480);
+      dialog.setPreferredSize(this.dialogWidth_, this.dialogHeight_);
       dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
@@ -197,10 +206,11 @@
         replaceAllButton
       );
 
-      dialog.getElement().setAttribute('id', 'manual-spellcheck-container');
+      var dialogElement = dialog.getElement();
+      dialogElement.setAttribute('id', 'manual-spellcheck-container');
 
 
-      goog.dom.append(dialog.getElement(),
+      goog.dom.append(dialogElement,
         inputsColumn,
         buttonsColumn
       );
@@ -253,12 +263,39 @@
         }
       }, this));
 
+      this.eventHandler_
+        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.BEFORE_HIDE, goog.bind(this.beforeHide_, this))
+        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.SHOW, goog.bind(this.afterShow_, this));
       this.dialog_ = dialog;
     }
 
     dialog.show();
   };
 
+  SpellcheckAction.prototype.beforeHide_ = function () {
+    var dialogElement = this.dialogElement_;
+    // Save dialog sizes and position for the next time it gets shown.
+    this.lastDialogPosition_ = goog.style.getPageOffset(dialogElement);
+    this.dialogWidth_ = dialogElement.clientWidth;
+    this.dialogHeight_ = dialogElement.clientHeight;
+
+  };
+
+  SpellcheckAction.prototype.afterShow_ = function () {
+    this.dialog_.setPreferredSize(this.dialogWidth_, this.dialogHeight_);
+    if (!this.dialogElement_) {
+      this.dialogElement_ = document.querySelector('#manual-spellcheck');
+    }
+    if (!this.lastDialogPosition_) {
+      var toolbar = document.querySelector('#builtin-toolbar');
+      if (toolbar) {
+        var position = goog.style.getPageOffset(toolbar);
+        goog.style.setPosition(this.dialogElement_, 0, (position.y + toolbar.clientHeight));
+      }
+    } else {
+      goog.style.setPosition(this.dialogElement_, this.lastDialogPosition_.x, this.lastDialogPosition_.y);
+    }
+  };
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
    this.showDialog_();

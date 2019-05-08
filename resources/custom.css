@@ -1,7 +1,3 @@
-.man-sp-label {
-  display: block;
-}
-
 .man-sp-input {
   display: block;
   width: 100%;
@@ -45,14 +41,18 @@
 .man-sp-button {
   border: 1px solid #C8C1C1; /* same grey as modal dialog buttons border. */
   border-radius: 4px;
-  padding: 5px 10px;
+  padding: 5px 2px;
   margin: 0 0 15px 10px;
   cursor: pointer;
   background-color: #fbfbfb;
-  font-size: 14px;
   text-align: center;
   line-height: 1.5;
 }
+
+.modal-dialog button.man-sp-button {
+  font-size: 14px;
+}
+
 .man-sp-button:hover, .man-sp-button:active {
   background-color: lightgray;
 }
