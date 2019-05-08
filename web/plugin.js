@@ -220,7 +220,7 @@
 
       var getErrorPosition = function () {
         var selection = sync.select.getSelection();
-        // todo: Show a warning if the selected result is in a read-only part of the document.
+        // todo: (WA-2981) Show a warning if the selected result is in a read-only part of the document.
         // Maybe just ignore it in results altogether.
         /*if (sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent)) {
           return null;
@@ -241,7 +241,6 @@
             // Add the word to the ignore list for the language.
             this.editor_.getSpellChecker().addIgnoredWord(language, word);
           } else if (buttonType === 'replace') {
-            // todo: grab replace action non-api or just use the operation and not care?
             var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
               this.editor_.getController(),
               -1,
