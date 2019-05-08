@@ -28,6 +28,7 @@
 
 .man-sp-col.man-inputs {
   flex-grow: 1;
+  min-width: 0; /* prevent flexbox overflow */
 }
 
 .man-sp-suggestion {
