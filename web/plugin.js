@@ -126,7 +126,6 @@
    }
    // First suggestion gets added to the replace input, also marked as selected.
    this.replaceInput_.value = suggestions[0];
-   /*goog.dom.classlist.add(suggestionElements[0], 'man-sp-selected');*/
    suggestionElements[0].setAttribute('selected', 'selected');
 
    goog.dom.removeChildren(this.suggestionsBox_);
@@ -184,7 +183,6 @@
         createDom('div', 'man-sp',
           goog.dom.createDom('div', {style: 'position: relative;'},
             goog.dom.createDom('label', { className: 'man-sp-label', for: 'man-sp-word' }, tr(msgs.MISSPELLED_WORD_) + ':')
-            /*goog.dom.createDom('span', 'man-sp-status', tr(msgs.NO_ERRORS_FOUND_))*/
           ),
           this.wordInput_,
           createLabel(this.replaceInput_, tr(msgs.REPLACE_WITH_)),
