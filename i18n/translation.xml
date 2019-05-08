@@ -7,13 +7,13 @@
         <language description="Japanese" lang="ja_JP"/>
         <language description="Dutch" lang="nl_NL"/>
     </languageList>
-    <key value="NO_ERRORS_FOUND_">
-        <comment>Message shown if there are no spelling errors in the document.</comment>
-        <val lang="en_US">No errors found.</val>
-        <val lang="de_DE">No errors found.</val>
-        <val lang="fr_FR">No errors found.</val>
-        <val lang="ja_JP">No errors found.</val>
-        <val lang="nl_NL">No errors found.</val>
+    <key value="NO_SPELLING_ERRORS_FOUND_">
+        <comment>Message displayed when no spelling errors were found.</comment>
+        <val lang="en_US">No spelling errors were found.</val>
+        <val lang="de_DE">Es wurden keine Rechtschreibfehler gefunden.</val>
+        <val lang="fr_FR">Aucune faute d'orthographe trouvée.</val>
+        <val lang="ja_JP">スペルミスはありませんでした。</val>
+        <val lang="nl_NL">Geen spelfouten gevonden.</val>
     </key>
     <key value="MISSPELLED_WORD_">
         <comment>Spelling highlight</comment>

@@ -55,6 +55,10 @@
    return tr(msgs.SPELL_CHECK_ACTION_);
  };
 
+ SpellcheckAction.prototype.showInfo_ = function (message) {
+   this.editor_.problemReporter && this.editor_.problemReporter.showInfo(message);
+ };
+
  SpellcheckAction.prototype.findNext = function () {
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
@@ -110,6 +114,7 @@
          this.replaceInput_.value = '';
          goog.dom.removeChildren(this.suggestionsBox_);
 
+         this.showInfo_(tr(msgs.NO_SPELLING_ERRORS_FOUND_));
        }
     }, this));
  };
