@@ -30,14 +30,8 @@
    this.replaceInput_ = null;
    this.suggestionsBox_ = null;
 
-   this.errorReporter_ = null;
    this.eventHandler_ = new goog.events.EventHandler(this);
-
    this.lastDialogPosition_ = null;
-   this.lastDialogSize_ = null;
-
-   this.dialogWidth_ = 350;
-   this.dialogHeight_ = 340;
  }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
@@ -103,9 +97,6 @@
        if (word) {
          this.word_ = word;
          this.language_ = result.language;
-         this.suggestions_ = result.suggestions;
-         this.startOffset_ = result.startOffset;
-         this.endOffset_ = result.endOffset;
          var suggestions = result.suggestions;
          if (suggestions && suggestions.length) {
            this.displaySuggestions_(suggestions);
@@ -144,7 +135,7 @@
     var dialog = this.dialog_;
     if (!dialog) {
       dialog = workspace.createDialog('manual-spellcheck', true);
-      dialog.setPreferredSize(this.dialogWidth_, this.dialogHeight_);
+      dialog.setPreferredSize(350, 340);
       dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
@@ -272,8 +263,6 @@
     var dialogElement = this.dialogElement_;
     // Save dialog sizes and position for the next time it gets shown.
     this.lastDialogPosition_ = goog.style.getPageOffset(dialogElement);
-    this.dialogWidth_ = dialogElement.clientWidth;
-    this.dialogHeight_ = dialogElement.clientHeight;
 
     /* Clear selected spellchecking error markers. */
     var fakeSpellcheckingSelections = document.querySelectorAll('.' + selectedMarkerClass);
@@ -283,7 +272,6 @@
   };
 
   SpellcheckAction.prototype.afterShow_ = function () {
-    this.dialog_.setPreferredSize(this.dialogWidth_, this.dialogHeight_);
     if (!this.dialogElement_) {
       this.dialogElement_ = document.querySelector('#manual-spellcheck');
     }
