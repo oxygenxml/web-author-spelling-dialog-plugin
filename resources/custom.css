@@ -61,6 +61,10 @@
   padding-bottom: 30px;
 }
 
+#manual-spellcheck.man-sp-transparence {
+  opacity: 0.8;
+}
+
 .spelling-selected {
   background-color: #5077e0;
   color: white;

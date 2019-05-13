@@ -31,7 +31,11 @@
    this.suggestionsBox_ = null;
 
    this.eventHandler_ = new goog.events.EventHandler(this);
+   this.dialogOpenHandler_ = new goog.events.EventHandler(this);
+
    this.lastDialogPosition_ = null;
+
+   this.transparenceClass_ = 'man-sp-transparence';
  }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
@@ -53,6 +57,73 @@
    this.editor_.problemReporter && this.editor_.problemReporter.showInfo(message);
  };
 
+  /**
+   * Make sure the selected error is visible - scroll to it and/or expand its fold.
+   * @private
+   */
+ SpellcheckAction.prototype.scrollIntoViewIfNeeded_ = function () {
+   var selectedNode = window.getSelection().focusNode;
+   if (selectedNode) {
+     if (selectedNode.nodeType === 3) {
+       selectedNode = selectedNode.parentNode;
+     }
+     var rect = selectedNode.getBoundingClientRect() || {};
+     // If the selected node is hidden, try to toggle the current fold.
+     if (rect.height === 0) {
+       this.editor_.getActionsManager().getActionById('Author/ToggleFold').actionPerformed(function() {
+         selectedNode.scrollIntoView(false);
+       })
+     } else {
+       selectedNode.scrollIntoView(false);
+     }
+   }
+ };
+
+  /**
+   * Clear selected spellchecking error markers.
+   * @private
+   */
+ SpellcheckAction.prototype.clearSelectedMarkers_ = function () {
+   var fakeSpellcheckingSelections = document.querySelectorAll('.' + selectedMarkerClass);
+   for (var j = 0; j < fakeSpellcheckingSelections.length; j++) {
+     goog.dom.classlist.remove(fakeSpellcheckingSelections[j], selectedMarkerClass);
+   }
+ };
+
+  /**
+   * If the highlight is covered by the dialog, make the dialog partly transparent.
+   * @param highlightChunks Chunks of highlighted marker.
+   */
+  SpellcheckAction.prototype.makeTransparentIfOverSelected_ = function (highlightChunks) {
+    if (highlightChunks && highlightChunks.length > 0) {
+      var overlap = false;
+      var dialogElement = document.querySelector('#manual-spellcheck');
+      var dialogRect = dialogElement.getBoundingClientRect();
+      goog.array.find(highlightChunks, function (chunk) {
+        var chunkRect = chunk.getBoundingClientRect();
+        overlap = !(chunkRect.right < dialogRect.left ||
+          chunkRect.left > dialogRect.right ||
+          chunkRect.bottom < dialogRect.top ||
+          chunkRect.top > dialogRect.bottom);
+        return overlap;
+      });
+
+      if (overlap) {
+        goog.dom.classlist.add(dialogElement, this.transparenceClass_);
+      } else {
+        this.removeTransparency_();
+      }
+    }
+  };
+
+  /**
+   * Remove transparency from find/replace dialog.
+   * @private
+   */
+  SpellcheckAction.prototype.removeTransparency_ = function () {
+    goog.dom.classlist.remove(this.dialogElement_, this.transparenceClass_);
+  };
+
  SpellcheckAction.prototype.findNext = function () {
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
@@ -60,31 +131,17 @@
        'fromCaret' : true,
        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
      }, goog.bind(function(err, resultString) {
-       var previouslySelected = document.querySelectorAll('.' + selectedMarkerClass);
-       for (var j = 0; j < previouslySelected.length; j++) {
-          goog.dom.classlist.remove(previouslySelected[j], selectedMarkerClass);
-       }
 
-       var selectedNode = window.getSelection().focusNode;
+       this.clearSelectedMarkers_();
 
        var markerAncestor = goog.dom.getAncestorByClass(window.getSelection().baseNode, 'spellcheckingError');
        if (markerAncestor) {
          goog.dom.classlist.add(markerAncestor, selectedMarkerClass);
        }
-       if (selectedNode) {
-         if (selectedNode.nodeType === 3) {
-           selectedNode = selectedNode.parentNode;
-         }
-         var rect = selectedNode.getBoundingClientRect() || {};
-         // If the selected node is hidden, try to toggle the current fold.
-         if (rect.height === 0) {
-           actionsManager.getActionById('Author/ToggleFold').actionPerformed(function() {
-             selectedNode.scrollIntoView(false);
-           })
-         } else {
-           selectedNode.scrollIntoView(false);
-         }
-       }
+
+       this.scrollIntoViewIfNeeded_();
+       this.makeTransparentIfOverSelected_([markerAncestor]);
+
        var result;
        try {
          result = JSON.parse(resultString);
@@ -140,12 +197,7 @@
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
 
-      var spDialogEventTarget = dialog.getEventTarget();
-      goog.events.listen(spDialogEventTarget, goog.ui.PopupBase.EventType.BEFORE_HIDE, goog.bind(this.beforeHide_, this));
-      //this.eventHandler_.listen()
-
       var createDom = goog.dom.createDom;
-
       this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text' });
       this.wordInput_.setAttribute('readonly', 'true');
       this.replaceInput_ = createDom('input', { id: 'man-sp-replace-with', className: 'man-sp-input', type: 'text' });
@@ -251,39 +303,47 @@
       }, this));
 
       this.eventHandler_
-        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.BEFORE_HIDE, goog.bind(this.beforeHide_, this))
-        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.SHOW, goog.bind(this.afterShow_, this));
+        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.SHOW, goog.bind(this.afterShow_, this))
+        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.BEFORE_HIDE, goog.bind(this.beforeHide_, this));
       this.dialog_ = dialog;
     }
 
     dialog.show();
   };
 
-  SpellcheckAction.prototype.beforeHide_ = function () {
-    var dialogElement = this.dialogElement_;
-    // Save dialog sizes and position for the next time it gets shown.
-    this.lastDialogPosition_ = goog.style.getPageOffset(dialogElement);
 
-    /* Clear selected spellchecking error markers. */
-    var fakeSpellcheckingSelections = document.querySelectorAll('.' + selectedMarkerClass);
-    for (var j = 0; j < fakeSpellcheckingSelections.length; j++) {
-      goog.dom.classlist.remove(fakeSpellcheckingSelections[j], selectedMarkerClass);
-    }
+  /**
+   * Save last position, clear dialog open listeners and selected markers.
+   * @private
+   */
+  SpellcheckAction.prototype.beforeHide_ = function () {
+    // Save dialog sizes and position for the next time it gets shown.
+    this.lastDialogPosition_ = goog.style.getPageOffset(this.dialogElement_);
+    this.clearSelectedMarkers_();
+    this.dialogOpenHandler_.removeAll();
   };
 
+  /**
+   * Set to default position first time, set dialog open listeners.
+   * @private
+   */
   SpellcheckAction.prototype.afterShow_ = function () {
     if (!this.dialogElement_) {
       this.dialogElement_ = document.querySelector('#manual-spellcheck');
     }
     if (!this.lastDialogPosition_) {
-      var toolbar = document.querySelector('#builtin-toolbar');
-      if (toolbar) {
-        var position = goog.style.getPageOffset(toolbar);
-        goog.style.setPosition(this.dialogElement_, 0, (position.y + toolbar.clientHeight));
+      var toolbarButton = document.querySelector('[name="spellcheck"]');
+      if (toolbarButton) {
+        var position = goog.style.getPageOffset(toolbarButton);
+        goog.style.setPosition(this.dialogElement_, position.x , (position.y + toolbarButton.clientHeight));
       }
     } else {
       goog.style.setPosition(this.dialogElement_, this.lastDialogPosition_.x, this.lastDialogPosition_.y);
     }
+
+    // Register some listeners only for when dialog is shown.
+    this.dialogOpenHandler_.listen(this.dialogElement_, goog.events.EventType.CLICK,
+      goog.bind(this.removeTransparency_, this), true);
   };
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
