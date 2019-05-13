@@ -14,7 +14,7 @@
 
    // Register the newly created action.
    editor.getActionsManager().registerAction('spellcheck', new SpellcheckAction(editor));
-   addToMoreToolbar(editor, 'spellcheck');	  
+   addToMoreToolbar(editor, 'spellcheck');
  });
 
 
@@ -85,10 +85,10 @@
          // If the selected node is hidden, try to toggle the current fold.
          if (rect.height === 0) {
            actionsManager.getActionById('Author/ToggleFold').actionPerformed(function() {
-             selectedNode.scrollIntoView();
+             selectedNode.scrollIntoView(false);
            })
          } else {
-           selectedNode.scrollIntoView();
+           selectedNode.scrollIntoView(false);
          }
        }
        var result;
@@ -140,12 +140,6 @@
    this.replaceInput_.value = this.suggestionsBox_.value;
  };
 
- SpellcheckAction.prototype.beforeHide_ = function () {
-   var fakeSpellcheckingSelections = document.querySelectorAll('.' + selectedMarkerClass);
-   for (var j = 0; j < fakeSpellcheckingSelections.length; j++) {
-     goog.dom.classlist.remove(fakeSpellcheckingSelections[j], selectedMarkerClass);
-   }
- };
   SpellcheckAction.prototype.showDialog_ = function () {
     var dialog = this.dialog_;
     if (!dialog) {
@@ -203,10 +197,10 @@
 
 
       var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
-        ignoreButton,
-        ignoreAllButton,
         replaceButton,
-        replaceAllButton
+        replaceAllButton,
+        ignoreButton,
+        ignoreAllButton
       );
 
       var dialogElement = dialog.getElement();
@@ -281,6 +275,11 @@
     this.dialogWidth_ = dialogElement.clientWidth;
     this.dialogHeight_ = dialogElement.clientHeight;
 
+    /* Clear selected spellchecking error markers. */
+    var fakeSpellcheckingSelections = document.querySelectorAll('.' + selectedMarkerClass);
+    for (var j = 0; j < fakeSpellcheckingSelections.length; j++) {
+      goog.dom.classlist.remove(fakeSpellcheckingSelections[j], selectedMarkerClass);
+    }
   };
 
   SpellcheckAction.prototype.afterShow_ = function () {
