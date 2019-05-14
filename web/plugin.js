@@ -157,15 +157,24 @@
          if (suggestions && suggestions.length) {
            this.displaySuggestions_(suggestions);
          }
-         this.setSpellCheckButtonsEnabled(true);
+         this.setSpellCheckButtonsEnabled_(true);
        } else {
-         this.replaceInput_.value = '';
-         goog.dom.removeChildren(this.suggestionsBox_);
+          this.clearSpellCheckSuggestions_();
 
          this.showInfo_(tr(msgs.NO_SPELLING_ERRORS_FOUND_));
        }
     }, this));
  };
+
+  /**
+   * Clear spellcheck suggestion.
+   *
+   * @private
+   */
+  SpellcheckAction.prototype.clearSpellCheckSuggestions_ = function() {
+    this.replaceInput_.value = '';
+    goog.dom.removeChildren(this.suggestionsBox_);
+  };
 
   /**
    * Populate the suggestions select with options.
@@ -276,7 +285,7 @@
       goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
         var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
         if (button) {
-          this.setSpellCheckButtonsEnabled(false);
+          this.setSpellCheckButtonsEnabled_(false);
           var buttonType = goog.dom.dataset.get(button, 'spButton');
           if (buttonType === 'ignore') {
             // just go to next marker.
@@ -316,7 +325,9 @@
       this.dialog_ = dialog;
     }
 
-    this.setSpellCheckButtonsEnabled(false);
+    this.setSpellCheckButtonsEnabled_(false);
+    this.wordInput_.value = '';
+    this.clearSpellCheckSuggestions_();
     dialog.show();
   };
 
@@ -325,7 +336,7 @@
    *
    * @param enabled True to enable all spellcheck buttons, false for disable.
    */
-  SpellcheckAction.prototype.setSpellCheckButtonsEnabled = function(enabled) {
+  SpellcheckAction.prototype.setSpellCheckButtonsEnabled_ = function(enabled) {
     var buttons = this.dialog_.getElement().getElementsByTagName('button');
     goog.array.forEach(buttons, function (button) {
       button.disabled = !enabled;
