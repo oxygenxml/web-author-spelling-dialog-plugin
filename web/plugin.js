@@ -157,6 +157,7 @@
          if (suggestions && suggestions.length) {
            this.displaySuggestions_(suggestions);
          }
+         this.setSpellCheckButtonsEnabled(true);
        } else {
          this.replaceInput_.value = '';
          goog.dom.removeChildren(this.suggestionsBox_);
@@ -197,6 +198,7 @@
     if (!dialog) {
       dialog = workspace.createDialog('manual-spellcheck');
       dialog.setPreferredSize(350, 340);
+      dialog.dialog.setHasTitleCloseButton(true);
       dialog.setBackgroundElementOpacity(0);
       dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
@@ -274,6 +276,7 @@
       goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
         var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
         if (button) {
+          this.setSpellCheckButtonsEnabled(false);
           var buttonType = goog.dom.dataset.get(button, 'spButton');
           if (buttonType === 'ignore') {
             // just go to next marker.
@@ -313,7 +316,20 @@
       this.dialog_ = dialog;
     }
 
+    this.setSpellCheckButtonsEnabled(false);
     dialog.show();
+  };
+
+  /**
+   * Activate/inactivate the spellcheck.
+   *
+   * @param enabled True to enable all spellcheck buttons, false for disable.
+   */
+  SpellcheckAction.prototype.setSpellCheckButtonsEnabled = function(enabled) {
+    var buttons = this.dialog_.getElement().getElementsByTagName('button');
+    goog.array.forEach(buttons, function (button) {
+      button.disabled = !enabled;
+    });
   };
 
 
