@@ -137,10 +137,9 @@
        var markerAncestor = goog.dom.getAncestorByClass(window.getSelection().baseNode, 'spellcheckingError');
        if (markerAncestor) {
          goog.dom.classlist.add(markerAncestor, selectedMarkerClass);
+         this.scrollIntoViewIfNeeded_();
+         this.makeTransparentIfOverSelected_([markerAncestor]);
        }
-
-       this.scrollIntoViewIfNeeded_();
-       this.makeTransparentIfOverSelected_([markerAncestor]);
 
        var result;
        try {
@@ -167,6 +166,11 @@
     }, this));
  };
 
+  /**
+   * Populate the suggestions select with options.
+   * @param {Array<String>} suggestions The list of suggestions.
+   * @private
+   */
  SpellcheckAction.prototype.displaySuggestions_ = function (suggestions) {
    var suggestionElements = [];
    for (var i = 0; i < suggestions.length; i++) {
