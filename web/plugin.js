@@ -289,11 +289,13 @@
           var buttonType = goog.dom.dataset.get(button, 'spButton');
           if (buttonType === 'ignore') {
             // just go to next marker.
+            this.findNext();
           } else if (buttonType === 'ignore_all') {
             var language = this.language_;
             var word = this.word_;
             // Add the word to the ignore list for the language.
             this.editor_.getSpellChecker().addIgnoredWord(language, word);
+            this.findNext();
           } else if (buttonType === 'replace') {
             var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
               this.editor_.getController(),
@@ -303,7 +305,7 @@
               this.replaceInput_.value,
               getErrorPosition()
             );
-            replaceAction.actionPerformed();
+            replaceAction.actionPerformed(goog.bind(this.findNext, this));
           } else if (buttonType === 'replace_all') {
             sync.rest.callAsync(RESTFindReplaceSupport.replaceAllInDocument, {
               docId: this.editor_.getController().docId,
@@ -313,9 +315,9 @@
               wholeWords: true
             }).then(goog.bind(function (e) {
               this.editor_.getController().applyUpdate_(e);
+              this.findNext();
             }, this));
           }
-          this.findNext();
         }
       }, this));
 
