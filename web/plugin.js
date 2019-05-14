@@ -195,8 +195,9 @@
   SpellcheckAction.prototype.showDialog_ = function () {
     var dialog = this.dialog_;
     if (!dialog) {
-      dialog = workspace.createDialog('manual-spellcheck', true);
+      dialog = workspace.createDialog('manual-spellcheck');
       dialog.setPreferredSize(350, 340);
+      dialog.setBackgroundElementOpacity(0);
       dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
