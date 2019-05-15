@@ -47,13 +47,15 @@
   background-color: #fbfbfb;
   text-align: center;
   line-height: 1.5;
-}
-
-.modal-dialog button.man-sp-button {
   font-size: 14px;
 }
 
-.man-sp-button:hover, .man-sp-button:active {
+.man-sp-button[disabled] {
+  color: #ababab;
+  background-color: #eeeeee;
+}
+
+.man-sp-button:not([disabled]):hover, .man-sp-button:active {
   background-color: lightgray;
 }
 

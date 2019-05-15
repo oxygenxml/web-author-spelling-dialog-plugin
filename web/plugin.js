@@ -36,6 +36,7 @@
    this.transparenceClass_ = 'man-sp-transparence';
 
    this.replaceButton_ = null;
+   this.replaceAllButton_ = null;
    this.ignoreButton_ = null;
    this.selectedMarkerChunks_ = null;
  }
@@ -140,7 +141,14 @@
          if (suggestions && suggestions.length) {
            this.displaySuggestions_(suggestions);
          }
+         // If selection is now in readonly content, disable replace buttons.
          this.setSpellCheckButtonsEnabled_(true);
+         var selectionInReadOnlyContent = sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent) &&
+           !this.editor_.getReadOnlyStatus().isReadOnly();
+         if (selectionInReadOnlyContent) {
+           this.replaceButton_.disabled = true;
+           this.replaceAllButton_.disabled = true;
+         }
        } else {
           this.clearSpellCheckSuggestions_();
 
@@ -217,14 +225,7 @@
         }
       );
 
-      var createLabel = function (inputElement, caption) {
-        return goog.dom.createDom('label', { className: 'man-sp-label' },
-          caption + ':',
-          inputElement
-        )
-      };
-
-      var suggestionsLabel = createLabel(null, tr(msgs.SUGGESTIONS_));
+      var suggestionsLabel = goog.dom.createDom('label', { className: 'man-sp-label' }, tr(msgs.SUGGESTIONS_) + ':');
       suggestionsLabel.setAttribute('for', 'man-sp-suggestions');
       var inputsColumn = createDom('div', 'man-sp-col man-inputs',
         createDom('div', 'man-sp',
@@ -232,7 +233,10 @@
             goog.dom.createDom('label', { className: 'man-sp-label', for: 'man-sp-word' }, tr(msgs.MISSPELLED_WORD_) + ':')
           ),
           this.wordInput_,
-          createLabel(this.replaceInput_, tr(msgs.REPLACE_WITH_)),
+          goog.dom.createDom('label', { className: 'man-sp-label' },
+            tr(msgs.REPLACE_WITH_) + ':',
+            this.replaceInput_
+          ),
           suggestionsLabel,
           this.suggestionsBox_
         )
@@ -246,12 +250,12 @@
       this.ignoreButton_ = createButton('ignore', tr(msgs.IGNORE_));
       var ignoreAllButton = createButton('ignore_all', tr(msgs.IGNORE_ALL_));
       this.replaceButton_ = createButton('replace', tr(msgs.REPLACE_));
-      var replaceAllButton = createButton('replace_all', tr(msgs.REPLACE_ALL_));
+      this.replaceAllButton_ = createButton('replace_all', tr(msgs.REPLACE_ALL_));
 
 
       var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
         this.replaceButton_,
-        replaceAllButton,
+        this.replaceAllButton_,
         this.ignoreButton_,
         ignoreAllButton
       );
@@ -371,23 +375,31 @@
     // Register some listeners only for when dialog is shown.
     this.dialogOpenHandler_
       .listen(this.dialogElement_, goog.events.EventType.CLICK, goog.bind(this.removeTransparency_, this), true)
-      .listen(this.replaceInput_, goog.events.EventType.KEYUP, goog.bind(function (e) {
-        // On Enter do Replace if enabled, Ignore otherwise.
-        if (e.keyCode === goog.events.KeyCodes.ENTER) {
-          var disableButtons = false;
-          if (this.replaceButton_.disabled === false) {
-            disableButtons = true;
-            this.replace_();
-          } else if (this.ignoreButton_.disabled === false) {
-            disableButtons = true;
-            this.findNext();
-          }
-          if (disableButtons) {
-            this.setSpellCheckButtonsEnabled_(false);
-          }
-        }
-      }, this));
+      .listen(this.replaceInput_, goog.events.EventType.KEYUP, goog.bind(this.doActionOnEnter_, this));
   };
+
+  /**
+   * Trigger actions on Enter while in the replace with input or suggestions select.
+   * @param {goog.events.EventType.KEYUP} e The keyup event.
+   * @private
+   */
+  SpellcheckAction.prototype.doActionOnEnter_ = function (e) {
+    // On Enter do Replace if enabled, Ignore otherwise.
+    if (e.keyCode === goog.events.KeyCodes.ENTER) {
+      var disableButtons = false;
+      if (this.replaceButton_.disabled === false) {
+        disableButtons = true;
+        this.replace_();
+      } else if (this.ignoreButton_.disabled === false) {
+        disableButtons = true;
+        this.findNext();
+      }
+      if (disableButtons) {
+        this.setSpellCheckButtonsEnabled_(false);
+      }
+    }
+  };
+
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
    this.showDialog_();
