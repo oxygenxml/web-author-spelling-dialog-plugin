@@ -36,6 +36,9 @@
    this.lastDialogPosition_ = null;
 
    this.transparenceClass_ = 'man-sp-transparence';
+
+   this.replaceButton_ = null;
+   this.ignoreButton_ = null;
  }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
@@ -244,7 +247,7 @@
         goog.dom.dataset.set(button, 'spButton', name);
         return button;
       };
-      var ignoreButton = createButton('ignore', tr(msgs.IGNORE_));
+      this.ignoreButton_ = createButton('ignore', tr(msgs.IGNORE_));
       var ignoreAllButton = createButton('ignore_all', tr(msgs.IGNORE_ALL_));
       this.replaceButton_ = createButton('replace', tr(msgs.REPLACE_));
       var replaceAllButton = createButton('replace_all', tr(msgs.REPLACE_ALL_));
@@ -253,7 +256,7 @@
       var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
         this.replaceButton_,
         replaceAllButton,
-        ignoreButton,
+        this.ignoreButton_,
         ignoreAllButton
       );
 
@@ -385,10 +388,16 @@
       .listen(this.replaceInput_, goog.events.EventType.KEYUP, goog.bind(function (e) {
         // On Enter do Replace if enabled, Ignore otherwise.
         if (e.keyCode === goog.events.KeyCodes.ENTER) {
-          if (this.replaceButton_.disabled) {
-            this.findNext();
-          } else {
+          var disableButtons = false;
+          if (this.replaceButton_.disabled === false) {
+            disableButtons = true;
             this.replace_();
+          } else if (this.ignoreButton_.disabled === false) {
+            disableButtons = true;
+            this.findNext();
+          }
+          if (disableButtons) {
+            this.setSpellCheckButtonsEnabled_(false);
           }
         }
       }, this));
