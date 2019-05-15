@@ -33,8 +33,6 @@
    this.eventHandler_ = new goog.events.EventHandler(this);
    this.dialogOpenHandler_ = new goog.events.EventHandler(this);
 
-   this.lastDialogPosition_ = null;
-
    this.transparenceClass_ = 'man-sp-transparence';
 
    this.replaceButton_ = null;
@@ -203,6 +201,11 @@
       dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
+      var toolbarButton = document.querySelector('[name="spellcheck"]');
+      if (toolbarButton) {
+        var position = goog.style.getPageOffset(toolbarButton);
+        dialog.setPosition(position.x , (position.y + toolbarButton.clientHeight));
+      }
 
       var createDom = goog.dom.createDom;
       this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text' });
@@ -352,7 +355,6 @@
    */
   SpellcheckAction.prototype.beforeHide_ = function () {
     // Save dialog sizes and position for the next time it gets shown.
-    this.lastDialogPosition_ = goog.style.getPageOffset(this.dialogElement_);
     sync.view.SelectionView.clearSelectionPlaceholder();
     this.dialogOpenHandler_.removeAll();
   };
@@ -364,15 +366,6 @@
   SpellcheckAction.prototype.afterShow_ = function () {
     if (!this.dialogElement_) {
       this.dialogElement_ = document.querySelector('#manual-spellcheck');
-    }
-    if (!this.lastDialogPosition_) {
-      var toolbarButton = document.querySelector('[name="spellcheck"]');
-      if (toolbarButton) {
-        var position = goog.style.getPageOffset(toolbarButton);
-        goog.style.setPosition(this.dialogElement_, position.x , (position.y + toolbarButton.clientHeight));
-      }
-    } else {
-      goog.style.setPosition(this.dialogElement_, this.lastDialogPosition_.x, this.lastDialogPosition_.y);
     }
 
     // Register some listeners only for when dialog is shown.
