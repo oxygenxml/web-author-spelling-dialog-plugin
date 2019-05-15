@@ -207,7 +207,7 @@
     if (!dialog) {
       dialog = workspace.createDialog('manual-spellcheck');
       dialog.setPreferredSize(350, 340);
-      dialog.dialog.setHasTitleCloseButton(true);
+      dialog.setHasTitleCloseButton(true);
       dialog.setBackgroundElementOpacity(0);
       dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
