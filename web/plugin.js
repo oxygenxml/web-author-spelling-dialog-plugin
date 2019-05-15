@@ -39,6 +39,7 @@
 
    this.replaceButton_ = null;
    this.ignoreButton_ = null;
+   this.selectedMarkerChunks_ = null;
  }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
@@ -62,24 +63,13 @@
 
   /**
    * Make sure the selected error is visible - scroll to it and/or expand its fold.
+   * @param {NodeList} nodes List of fake selection nodes.
    * @private
    */
- SpellcheckAction.prototype.scrollIntoViewIfNeeded_ = function () {
-   var selectedNode = window.getSelection().focusNode;
-   if (selectedNode) {
-     if (selectedNode.nodeType === 3) {
-       selectedNode = selectedNode.parentNode;
-     }
-     var rect = selectedNode.getBoundingClientRect() || {};
-     // If the selected node is hidden, try to toggle the current fold.
-     if (rect.height === 0) {
-       this.editor_.getActionsManager().getActionById('Author/ToggleFold').actionPerformed(function() {
-         selectedNode.scrollIntoView(false);
-       })
-     } else {
-       selectedNode.scrollIntoView(false);
-     }
-   }
+ SpellcheckAction.prototype.scrollIntoViewIfNeeded_ = function (nodes) {
+  if (nodes.length) {
+    nodes[0].scrollIntoView(false);
+  }
  };
 
   /**
@@ -160,6 +150,9 @@
        }
 
        sync.view.SelectionView.renderSelectionPlaceholder(sync.select.getSelection());
+       this.selectedMarkerChunks_ = document.querySelectorAll('.selection-placeholder');
+       this.scrollIntoViewIfNeeded_(this.selectedMarkerChunks_);
+       this.makeTransparentIfOverSelected_(this.selectedMarkerChunks_);
        this.replaceInput_.focus();
     }, this));
  };
