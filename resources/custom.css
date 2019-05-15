@@ -41,7 +41,7 @@
 .man-sp-button {
   border: 1px solid #C8C1C1; /* same grey as modal dialog buttons border. */
   border-radius: 4px;
-  padding: 5px 2px;
+  padding: 5px;
   margin: 0 0 15px 10px;
   cursor: pointer;
   background-color: #fbfbfb;

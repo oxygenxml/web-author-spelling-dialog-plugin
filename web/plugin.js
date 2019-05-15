@@ -125,21 +125,13 @@
   };
 
  SpellcheckAction.prototype.findNext = function () {
+   sync.view.SelectionView.clearSelectionPlaceholder();
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
        'fromCaret' : true,
        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
      }, goog.bind(function(err, resultString) {
-
-       this.clearSelectedMarkers_();
-
-       var markerAncestor = goog.dom.getAncestorByClass(window.getSelection().baseNode, 'spellcheckingError');
-       if (markerAncestor) {
-         goog.dom.classlist.add(markerAncestor, selectedMarkerClass);
-         this.scrollIntoViewIfNeeded_();
-         this.makeTransparentIfOverSelected_([markerAncestor]);
-       }
 
        var result;
        try {
@@ -163,6 +155,9 @@
 
          this.showInfo_(tr(msgs.NO_SPELLING_ERRORS_FOUND_));
        }
+
+       sync.view.SelectionView.renderSelectionPlaceholder(sync.select.getSelection());
+       this.replaceInput_.focus();
     }, this));
  };
 
@@ -251,12 +246,12 @@
       };
       var ignoreButton = createButton('ignore', tr(msgs.IGNORE_));
       var ignoreAllButton = createButton('ignore_all', tr(msgs.IGNORE_ALL_));
-      var replaceButton = createButton('replace', tr(msgs.REPLACE_));
+      this.replaceButton_ = createButton('replace', tr(msgs.REPLACE_));
       var replaceAllButton = createButton('replace_all', tr(msgs.REPLACE_ALL_));
 
 
       var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
-        replaceButton,
+        this.replaceButton_,
         replaceAllButton,
         ignoreButton,
         ignoreAllButton
@@ -270,16 +265,6 @@
         inputsColumn,
         buttonsColumn
       );
-
-      var getErrorPosition = function () {
-        var selection = sync.select.getSelection();
-        // todo: (WA-2981) Show a warning if the selected result is in a read-only part of the document.
-        // Maybe just ignore it in results altogether.
-        /*if (sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent)) {
-          return null;
-        }*/
-        return selection.start.toRelativeContentPosition();
-      };
 
       goog.events.listen(this.suggestionsBox_, goog.events.EventType.CHANGE, goog.bind(this.suggestionSelected_, this));
       goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
@@ -297,15 +282,7 @@
             this.editor_.getSpellChecker().addIgnoredWord(language, word);
             this.findNext();
           } else if (buttonType === 'replace') {
-            var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
-              this.editor_.getController(),
-              -1,
-              -1,
-              this.word_,
-              this.replaceInput_.value,
-              getErrorPosition()
-            );
-            replaceAction.actionPerformed(goog.bind(this.findNext, this));
+            this.replace_();
           } else if (buttonType === 'replace_all') {
             sync.rest.callAsync(RESTFindReplaceSupport.replaceAllInDocument, {
               docId: this.editor_.getController().docId,
@@ -334,6 +311,33 @@
   };
 
   /**
+   * Replace an error with the selected value.
+   * @private
+   */
+  SpellcheckAction.prototype.replace_ = function () {
+    var selection = sync.select.getSelection();
+    var selectionStartRelativePosition = selection.start.toRelativeContentPosition();
+    // todo: (WA-2981) Show a warning if the selected result is in a read-only part of the document.
+    // Maybe just ignore it in results altogether.
+    /*if (sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent)) {
+      return null;
+    }*/
+
+    var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
+      this.editor_.getController(),
+      -1,
+      -1,
+      this.word_,
+      this.replaceInput_.value,
+      selectionStartRelativePosition
+    );
+    replaceAction.actionPerformed(goog.bind(function () {
+      this.replaceInput_.focus();
+      this.findNext();
+    }, this));
+  };
+
+  /**
    * Activate/inactivate the spellcheck.
    *
    * @param enabled True to enable all spellcheck buttons, false for disable.
@@ -353,7 +357,7 @@
   SpellcheckAction.prototype.beforeHide_ = function () {
     // Save dialog sizes and position for the next time it gets shown.
     this.lastDialogPosition_ = goog.style.getPageOffset(this.dialogElement_);
-    this.clearSelectedMarkers_();
+    sync.view.SelectionView.clearSelectionPlaceholder();
     this.dialogOpenHandler_.removeAll();
   };
 
@@ -376,8 +380,18 @@
     }
 
     // Register some listeners only for when dialog is shown.
-    this.dialogOpenHandler_.listen(this.dialogElement_, goog.events.EventType.CLICK,
-      goog.bind(this.removeTransparency_, this), true);
+    this.dialogOpenHandler_
+      .listen(this.dialogElement_, goog.events.EventType.CLICK, goog.bind(this.removeTransparency_, this), true)
+      .listen(this.replaceInput_, goog.events.EventType.KEYUP, goog.bind(function (e) {
+        // On Enter do Replace if enabled, Ignore otherwise.
+        if (e.keyCode === goog.events.KeyCodes.ENTER) {
+          if (this.replaceButton_.disabled) {
+            this.findNext();
+          } else {
+            this.replace_();
+          }
+        }
+      }, this));
   };
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
