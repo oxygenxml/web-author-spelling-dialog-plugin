@@ -1,5 +1,6 @@
 .man-sp-input {
   display: block;
+  flex-shrink: 0;
   width: 100%;
 }
 
@@ -19,12 +20,13 @@
 }
 #man-sp-suggestions {
   flex-grow: 1;
+  min-height: 1px;
   overflow-y: scroll;
 }
 
 .man-sp-col.man-inputs {
   flex-grow: 1;
-  min-width: 0; /* prevent flexbox overflow */
+  min-width: 1px; /* prevent flexbox overflow, also 1px instead of 0 because IE doesn't like it. */
 }
 
 .man-sp-suggestion {
