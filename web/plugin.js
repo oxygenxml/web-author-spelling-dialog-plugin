@@ -138,7 +138,7 @@
          this.word_ = word;
          this.language_ = result.language;
          var suggestions = result.suggestions;
-         if (suggestions && suggestions.length) {
+         if (suggestions) {
            this.displaySuggestions_(suggestions);
          }
          // If selection is now in readonly content, disable replace buttons.
@@ -179,16 +179,20 @@
    * @private
    */
  SpellcheckAction.prototype.displaySuggestions_ = function (suggestions) {
-   var suggestionElements = [];
-   for (var i = 0; i < suggestions.length; i++) {
-      suggestionElements.push(goog.dom.createDom('option', 'man-sp-suggestion', suggestions[i]));
-   }
-   // First suggestion gets added to the replace input, also marked as selected.
-   this.replaceInput_.value = suggestions[0];
-   suggestionElements[0].setAttribute('selected', 'selected');
-
+   // In case of no suggestions, just clear replace with input and suggestions box.
+   this.replaceInput_.value = '';
    goog.dom.removeChildren(this.suggestionsBox_);
-   goog.dom.append(this.suggestionsBox_, suggestionElements);
+
+   if (suggestions.length) {
+     var suggestionElements = [];
+     for (var i = 0; i < suggestions.length; i++) {
+       suggestionElements.push(goog.dom.createDom('option', 'man-sp-suggestion', suggestions[i]));
+     }
+     // First suggestion gets added to the replace input, also marked as selected.
+     this.replaceInput_.value = suggestions[0];
+     suggestionElements[0].setAttribute('selected', 'selected');
+     goog.dom.append(this.suggestionsBox_, suggestionElements);
+   }
  };
 
   /**
@@ -320,12 +324,6 @@
   SpellcheckAction.prototype.replace_ = function () {
     var selection = sync.select.getSelection();
     var selectionStartRelativePosition = selection.start.toRelativeContentPosition();
-    // todo: (WA-2981) Show a warning if the selected result is in a read-only part of the document.
-    // Maybe just ignore it in results altogether.
-    /*if (sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent)) {
-      return null;
-    }*/
-
     var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
       this.editor_.getController(),
       -1,
@@ -375,7 +373,8 @@
     // Register some listeners only for when dialog is shown.
     this.dialogOpenHandler_
       .listen(this.dialogElement_, goog.events.EventType.CLICK, goog.bind(this.removeTransparency_, this), true)
-      .listen(this.replaceInput_, goog.events.EventType.KEYUP, goog.bind(this.doActionOnEnter_, this));
+      .listen(this.replaceInput_, goog.events.EventType.KEYUP, goog.bind(this.doActionOnEnter_, this))
+      .listen(this.suggestionsBox_, goog.events.EventType.KEYUP, goog.bind(this.doActionOnEnter_, this));
   };
 
   /**
