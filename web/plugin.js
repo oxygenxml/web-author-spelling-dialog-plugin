@@ -13,8 +13,8 @@
    var editor = e.editor;
 
    // Register the newly created action.
-   editor.getActionsManager().registerAction('spellcheck', new SpellcheckAction(editor));
-   addToMoreToolbar(editor, 'spellcheck');
+   editor.getActionsManager().registerAction(spellingDialogActionId, new SpellcheckAction(editor));
+   addToMoreToolbar(editor, spellingDialogActionId);
  });
 
 
@@ -45,7 +45,11 @@
  SpellcheckAction.prototype.constructor = SpellcheckAction;
 
  SpellcheckAction.prototype.getLargeIcon = function () {
-   return sync.util.computeHdpiIcon('../plugin-resources/man-sp/SpellCheck24.png');
+   var icon = 'SpellCheck24.png';
+   if (document.querySelector('.no-app-bar')) {
+    icon = 'Blue_SpellCheck24.png';
+   }
+   return sync.util.computeHdpiIcon('../plugin-resources/man-sp/' + icon);
  };
 
   SpellcheckAction.prototype.getDescription = function() {
@@ -213,7 +217,7 @@
       dialog.setTitle(tr(msgs.SPELLING_));
       dialog.setResizable(true);
       dialog.setButtonConfiguration([]);
-      var toolbarButton = document.querySelector('[name="spellcheck"]');
+      var toolbarButton = document.querySelector('[name="' + spellingDialogActionId + '"]');
       if (toolbarButton) {
         var position = goog.style.getPageOffset(toolbarButton);
         dialog.setPosition(position.x , (position.y + toolbarButton.clientHeight));
