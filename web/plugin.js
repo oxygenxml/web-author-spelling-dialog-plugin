@@ -143,9 +143,9 @@
          }
          // If selection is now in readonly content, disable replace buttons.
          this.setSpellCheckButtonsEnabled_(true);
-         var selectionInReadOnlyContent = sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent) &&
-           !this.editor_.getReadOnlyStatus().isReadOnly();
-         if (selectionInReadOnlyContent) {
+         var editorReadOnlyStatus = this.editor_.getReadOnlyStatus().isReadOnly();
+         var selectionInReadOnlyContent = sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent);
+         if (editorReadOnlyStatus || selectionInReadOnlyContent) {
            this.replaceButton_.disabled = true;
            this.replaceAllButton_.disabled = true;
          }
