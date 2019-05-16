@@ -38,7 +38,6 @@
    this.replaceButton_ = null;
    this.replaceAllButton_ = null;
    this.ignoreButton_ = null;
-   this.selectedMarkerChunks_ = null;
  }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
@@ -160,9 +159,10 @@
        }
 
        sync.view.SelectionView.renderSelectionPlaceholder(sync.select.getSelection());
-       this.selectedMarkerChunks_ = document.querySelectorAll('.selection-placeholder');
-       this.scrollIntoViewIfNeeded_(this.selectedMarkerChunks_);
-       this.makeTransparentIfOverSelected_(this.selectedMarkerChunks_);
+       // Consider only non-empty selection placeholder chunks for the dialog overlap check.
+       var selectedMarkerChunks = document.querySelectorAll('.selection-placeholder:not(.caret-placeholder)');
+       this.scrollIntoViewIfNeeded_(selectedMarkerChunks);
+       this.makeTransparentIfOverSelected_(selectedMarkerChunks);
        this.replaceInput_.focus();
     }, this));
  };
