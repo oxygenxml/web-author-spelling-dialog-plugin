@@ -277,7 +277,9 @@
         buttonsColumn
       );
 
-      goog.events.listen(this.suggestionsBox_, goog.events.EventType.CHANGE, goog.bind(this.suggestionSelected_, this));
+      goog.events.listen(this.suggestionsBox_, [goog.events.EventType.CHANGE, goog.events.EventType.FOCUS],
+        goog.bind(this.suggestionSelected_, this));
+
       goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
         var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
         if (button) {
