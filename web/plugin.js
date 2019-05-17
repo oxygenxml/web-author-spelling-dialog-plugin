@@ -220,7 +220,7 @@
     var dialog = this.dialog_;
     if (!dialog) {
       dialog = workspace.createDialog('manual-spellcheck');
-      dialog.setPreferredSize(350, 340);
+      dialog.setPreferredSize(370, 340);
       dialog.setHasTitleCloseButton(true);
       dialog.setBackgroundElementOpacity(0);
       dialog.setTitle(tr(msgs.SPELLING_));
@@ -260,7 +260,7 @@
       );
 
       var createButton = function (name, caption) {
-        var button = goog.dom.createDom('button', { className: 'man-sp-button oxy-button ' }, caption);
+        var button = goog.dom.createDom('button', { className: 'man-sp-button oxy-button oxy-small-button' }, caption);
         goog.dom.dataset.set(button, 'spButton', name);
         return button;
       };
