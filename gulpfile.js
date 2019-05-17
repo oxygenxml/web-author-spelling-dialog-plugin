@@ -16,8 +16,8 @@ gulp.task('prepare-package', ['i18n'], function() {
   return gulp.src("web/*.js")
     .pipe(sort())
     .pipe(concat('plugin.js'))
-    .pipe(uglify())
     .pipe(iife({useStrict: false, prependSemicolon: true}))
+    .pipe(uglify())
     .pipe(gulp.dest('target/'));
 });
 
