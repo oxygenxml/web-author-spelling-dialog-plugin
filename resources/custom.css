@@ -40,25 +40,15 @@
   background-color: #d8e2ea;
 }
 
-.man-sp-button {
-  border: 1px solid #C8C1C1; /* same grey as modal dialog buttons border. */
-  border-radius: 4px;
+.man-sp-button.oxy-button {
   padding: 5px;
-  margin: 0 0 15px 10px;
-  cursor: pointer;
-  background-color: #fbfbfb;
-  text-align: center;
-  line-height: 1.5;
-  font-size: 14px;
+  margin: 0 0 10px 10px;
+  font-size: 15px;
 }
 
-.man-sp-button[disabled] {
+.man-sp-button.oxy-button[disabled] {
   color: #ababab;
   background-color: #eeeeee;
-}
-
-.man-sp-button:not([disabled]):hover, .man-sp-button:active {
-  background-color: lightgray;
 }
 
 #manual-spellcheck .modal-dialog-content{

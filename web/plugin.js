@@ -260,7 +260,7 @@
       );
 
       var createButton = function (name, caption) {
-        var button = goog.dom.createDom('button', { className: 'man-sp-button ' }, caption);
+        var button = goog.dom.createDom('button', { className: 'man-sp-button oxy-button ' }, caption);
         goog.dom.dataset.set(button, 'spButton', name);
         return button;
       };
