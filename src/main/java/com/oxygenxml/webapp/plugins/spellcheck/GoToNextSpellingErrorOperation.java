@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
 
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -43,12 +44,24 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    * Attribute name for the end position of the last spelling error.
    */
   private static final String END_POS_ATTR_NAME = "com.oxygenxml.plugins.spellcheck.endPos";
+  
+  /**
+   * Attribute name for the start position when the dialog was open.
+   */
+  private static final String MAN_SP_START = "com.oxygen.plugins.spellcheck.spellcheckStartPos";
+  
+  /**
+   * Save wrapped status.
+   */
+  private static final String MAN_SP_WRAPPED = "com.oxygen.plugins.spellcheck.wrapped";
 
   @Override
   public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args)
       throws AuthorOperationException {
     String result = null;
+    boolean saveStartPosition = (Boolean)args.getArgumentValue("saveStartPosition");
     boolean fromCaret = (Boolean)args.getArgumentValue("fromCaret");
+    
     IgnoredWords ignoredWords = 
         IgnoredWords.fromUncheckedArgument(args.getArgumentValue("ignoredWords"));
     WebappSpellchecker spellchecker = docModel.getSpellchecker();
@@ -57,7 +70,28 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
         findNextProblem(docModel, fromCaret, ignoredWords);
     
     if (maybeNextProblem.isPresent()) {
+      boolean wrapped = false;
+      
       SpellCheckingProblemInfo nextProblem = maybeNextProblem.get();
+      if (saveStartPosition) {
+        saveSpellcheckStartPosition(docModel, nextProblem.getStartOffset());
+        // If first search it could not have wrapped.
+        // This covers the case when the first error comes after a wrap.
+        saveWrappedStatus(docModel, false);
+      } else {
+        // This is not the first search.
+        SpellCheckingProblemInfo previousProblem = getPreviousProblem(docModel);
+        if (isProbablySameProblem(previousProblem, nextProblem) || 
+            previousProblem.getStartOffset() > nextProblem.getStartOffset()) {
+          saveWrappedStatus(docModel, true);
+        }
+        
+        wrapped = getWrappedStatus(docModel);
+        int spellcheckStartPosition = getSpellcheckStartPosition(docModel);
+        if (wrapped && spellcheckStartPosition != -1 && nextProblem.getStartOffset() >= spellcheckStartPosition) {
+          return result;
+        }
+      }
       
       saveCurrentProblem(docModel, nextProblem);
       
@@ -87,6 +121,74 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
     }
     
     return result;
+  }
+
+  /**
+   * Get the wrapped status of the current session of manual spell check.
+   * @param docModel The author document model.
+   * @return Whether the search wrapped in this session.
+   */
+  private boolean getWrappedStatus(AuthorDocumentModel docModel) {
+    EditingSessionContext editingContext = docModel.getAuthorAccess().getEditorAccess().getEditingContext();
+    boolean wrappedStatus = false;
+    Object wrappedStatusObject = editingContext.getAttribute(MAN_SP_WRAPPED);
+    if (wrappedStatusObject != null) {
+      wrappedStatus = (boolean) wrappedStatusObject;
+    }
+    return wrappedStatus;
+  }
+
+  /**
+   * Check if two problems are likely to be the same one.
+   * @param previousProblem The previous problem.
+   * @param nextProblem The next problem.
+   * @return Whether they are likely to be the same problem.
+   */
+  private boolean isProbablySameProblem(SpellCheckingProblemInfo previousProblem, 
+      SpellCheckingProblemInfo nextProblem) {
+    return previousProblem.getStartOffset() == nextProblem.getStartOffset() &&
+        previousProblem.getEndOffset() == nextProblem.getEndOffset();
+  }
+
+  /**
+   * Save the position of the first error found in this session of manual spell check.
+   * @param docModel The author document model.
+   * @param spellcheckStartPos The start position of the first error.
+   * @throws AuthorOperationException
+   */
+  private void saveSpellcheckStartPosition(AuthorDocumentModel docModel, int spellcheckStartPos) throws AuthorOperationException {
+    EditingSessionContext editingContext = docModel.getAuthorAccess().getEditorAccess().getEditingContext();
+    try {
+      AuthorDocumentController controller = docModel.getAuthorDocumentController();
+      editingContext.setAttribute(MAN_SP_START, controller.createPositionInContent(spellcheckStartPos));
+    } catch (BadLocationException e) {
+      throw new AuthorOperationException(e.getMessage(), e);
+    }
+  }
+  
+  /**
+   * Remember if the search wraps.
+   * @param docModel The author document model.
+   * @param wrapped The wrap status.
+   */
+  private void saveWrappedStatus(AuthorDocumentModel docModel, boolean wrapped) {
+    EditingSessionContext editingContext = docModel.getAuthorAccess().getEditorAccess().getEditingContext();
+    editingContext.setAttribute(MAN_SP_WRAPPED, wrapped);
+  }
+  
+  /**
+   * Return the position where the manual spell check started. -1 if not set.
+   * @param docModel The document model.
+   * @return The position where the manual spell check started or -1 if not set.
+   */
+  private int getSpellcheckStartPosition(AuthorDocumentModel docModel) {    
+    EditingSessionContext editingContext = docModel.getAuthorAccess().getEditorAccess().getEditingContext();
+    Integer spellcheckStartOffset = -1;
+    Position spellcheckStartPosition = (Position)editingContext.getAttribute(MAN_SP_START);
+    if (spellcheckStartPosition != null) {
+      spellcheckStartOffset = spellcheckStartPosition.getOffset();
+    }
+    return spellcheckStartOffset;
   }
 
   /**
@@ -158,6 +260,19 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
     } catch (BadLocationException e) {
       throw new AuthorOperationException(e.getMessage(), e);
     }
+  }
+  
+  /**
+   * Get some information about the previous problem.
+   * It is not a complete problem info object.
+   * @param model The author document model.
+   * @return The problem info.
+   */
+  private SpellCheckingProblemInfo getPreviousProblem(AuthorDocumentModel model) {
+    EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
+    Position startPos = (Position) editingContext.getAttribute(START_POS_ATTR_NAME);
+    Position endPos = (Position) editingContext.getAttribute(END_POS_ATTR_NAME);
+    return new SpellCheckingProblemInfo(startPos.getOffset(), endPos.getOffset(), 0, null, null);
   }
 
   /**

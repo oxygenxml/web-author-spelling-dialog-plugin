@@ -128,13 +128,18 @@
     goog.dom.classlist.remove(this.dialogElement_, this.transparenceClass_);
   };
 
- SpellcheckAction.prototype.findNext = function () {
+  /**
+   * Find the next error.
+   * @param saveSpellcheckStartPosition Whether this is the first request after the dialog is shown.
+   */
+ SpellcheckAction.prototype.findNext = function (saveSpellcheckStartPosition) {
    sync.view.SelectionView.clearSelectionPlaceholder();
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
        'fromCaret' : true,
-       'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
+       'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords(),
+       'saveStartPosition': !!saveSpellcheckStartPosition
      }, goog.bind(function(err, resultString) {
 
        var result;
@@ -428,7 +433,7 @@
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
    this.showDialog_();
-   this.findNext();
+   this.findNext(true);
    callback && callback();
  };
 
