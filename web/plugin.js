@@ -70,7 +70,16 @@
    */
  SpellcheckAction.prototype.scrollIntoViewIfNeeded_ = function (nodes) {
   if (nodes.length) {
-    nodes[0].scrollIntoView(false);
+    var selectedNode = nodes[0];
+    var rect = selectedNode.getBoundingClientRect() || {};
+    // If the selected node is hidden, try to toggle the current fold.
+    if (rect.height === 0) {
+      this.editor_.getActionsManager().getActionById('Author/ToggleFold').actionPerformed(function() {
+        selectedNode.scrollIntoView(false);
+      })
+    } else {
+      selectedNode.scrollIntoView(false);
+    }
   }
  };
 
@@ -277,8 +286,19 @@
         buttonsColumn
       );
 
-      goog.events.listen(this.suggestionsBox_, [goog.events.EventType.CHANGE, goog.events.EventType.FOCUS],
+      var suggestionsBox = this.suggestionsBox_;
+      goog.events.listen(suggestionsBox, goog.events.EventType.CHANGE,
         goog.bind(this.suggestionSelected_, this));
+      goog.events.listen(suggestionsBox, goog.events.EventType.FOCUSIN, goog.bind(function () {
+        var replaceWithValue = this.replaceInput_.value;
+        // In case the replace with input value is the same as one of the options, update the selected option.
+        // If replace with input is not one of the options, unselect options.
+        if (replaceWithValue !== suggestionsBox.value) {
+          suggestionsBox.selectedIndex = goog.array.findIndex(suggestionsBox.options, function (o) {
+            return o.textContent === replaceWithValue;
+          });
+        }
+      }, this));
 
       goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
         var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
