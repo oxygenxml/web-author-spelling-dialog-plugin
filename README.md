@@ -17,7 +17,8 @@ mvn clean install
 To install the plugin in Oxygen XML Web Author you can use the Administration Page to upload the resulting JAR.
 
 # Use
-Click the ![spelling button](/resources/SpellCheck24.png) button from the toolbar, or use the F7 key to open the spelling dialog.
+Click the ![spelling button](/resources/Blue_SpellCheck24.png) button from the toolbar, or use the F7 key to open the spelling dialog.
+
 
 # Copyright and License
 
