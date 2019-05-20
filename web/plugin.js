@@ -305,36 +305,7 @@
         }
       }, this));
 
-      goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(function (e) {
-        var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
-        if (button) {
-          this.setSpellCheckButtonsEnabled_(false);
-          var buttonType = goog.dom.dataset.get(button, 'spButton');
-          if (buttonType === 'ignore') {
-            // just go to next marker.
-            this.findNext();
-          } else if (buttonType === 'ignore_all') {
-            var language = this.language_;
-            var word = this.word_;
-            // Add the word to the ignore list for the language.
-            this.editor_.getSpellChecker().addIgnoredWord(language, word);
-            this.findNext();
-          } else if (buttonType === 'replace') {
-            this.replace_();
-          } else if (buttonType === 'replace_all') {
-            sync.rest.callAsync(RESTFindReplaceSupport.replaceAllInDocument, {
-              docId: this.editor_.getController().docId,
-              textToFind: this.word_,
-              textToReplace: this.replaceInput_.value,
-              matchCase: true,
-              wholeWords: true
-            }).then(goog.bind(function (e) {
-              this.editor_.getController().applyUpdate_(e);
-              this.findNext();
-            }, this));
-          }
-        }
-      }, this));
+      goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(this.clickOnButtons_, this));
 
       this.eventHandler_
         .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.SHOW, goog.bind(this.afterShow_, this))
@@ -346,6 +317,42 @@
     this.wordInput_.value = '';
     this.clearSpellCheckSuggestions_();
     dialog.show();
+  };
+
+  /**
+   * Handle click in the buttons column.
+   * @param {goog.events.EventType.CLICK} e The click event.
+   * @private
+   */
+  SpellcheckAction.prototype.clickOnButtons_ = function (e) {
+    var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
+    if (button) {
+      this.setSpellCheckButtonsEnabled_(false);
+      var buttonType = goog.dom.dataset.get(button, 'spButton');
+      if (buttonType === 'ignore') {
+        // just go to next marker.
+        this.findNext();
+      } else if (buttonType === 'ignore_all') {
+        var language = this.language_;
+        var word = this.word_;
+        // Add the word to the ignore list for the language.
+        this.editor_.getSpellChecker().addIgnoredWord(language, word);
+        this.findNext();
+      } else if (buttonType === 'replace') {
+        this.replace_();
+      } else if (buttonType === 'replace_all') {
+        sync.rest.callAsync(RESTFindReplaceSupport.replaceAllInDocument, {
+          docId: this.editor_.getController().docId,
+          textToFind: this.word_,
+          textToReplace: this.replaceInput_.value,
+          matchCase: true,
+          wholeWords: true
+        }).then(goog.bind(function (e) {
+          this.editor_.getController().applyUpdate_(e);
+          this.findNext();
+        }, this));
+      }
+    }
   };
 
   /**
