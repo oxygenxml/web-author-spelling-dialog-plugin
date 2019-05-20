@@ -54,6 +54,16 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    * Save wrapped status.
    */
   private static final String MAN_SP_WRAPPED = "com.oxygen.plugins.spellcheck.wrapped";
+  
+  /**
+   * Save last checked word.
+   */
+  private static final String MAN_SP_WORD = "com.oxygen.plugins.spellcheck.word";
+  
+  /**
+   * Save language for last checked word.
+   */
+  private static final String MAN_SP_LANG = "com.oxygen.plugins.spellcheck.lang";
 
   @Override
   public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args)
@@ -99,13 +109,7 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
       docModel.getSelectionModel().setSelection(
           nextProblem.getStartOffset(), nextProblem.getEndOffset() + 1);
       
-      // Custom spell checker may provide suggestions with the problem info.
-      String[] suggestions;
-      if (nextProblem.getSuggestions() != null) {
-        suggestions = nextProblem.getSuggestions().toArray(new String[0]);
-      } else {
-        suggestions = findSuggestions(spellchecker, nextProblem);
-      }
+      String[] suggestions = findSuggestions(spellchecker, nextProblem);
       
       try {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -147,7 +151,9 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
   private boolean isProbablySameProblem(SpellCheckingProblemInfo previousProblem, 
       SpellCheckingProblemInfo nextProblem) {
     return previousProblem.getStartOffset() == nextProblem.getStartOffset() &&
-        previousProblem.getEndOffset() == nextProblem.getEndOffset();
+        previousProblem.getEndOffset() == nextProblem.getEndOffset() &&
+        previousProblem.getWord().equals(nextProblem.getWord()) &&
+        previousProblem.getLanguageIsoName().equals(nextProblem.getLanguageIsoName());
   }
 
   /**
@@ -257,6 +263,11 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
           controller.createPositionInContent(currentProblem.getStartOffset()));
       editingContext.setAttribute(END_POS_ATTR_NAME, 
           controller.createPositionInContent(currentProblem.getEndOffset()));
+      
+      // Also save the word and language to check for the case where
+      // there is only one error and the user hits ignore.
+      editingContext.setAttribute(MAN_SP_WORD, currentProblem.getWord());
+      editingContext.setAttribute(MAN_SP_LANG, currentProblem.getLanguageIsoName());
     } catch (BadLocationException e) {
       throw new AuthorOperationException(e.getMessage(), e);
     }
@@ -272,7 +283,9 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
     EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
     Position startPos = (Position) editingContext.getAttribute(START_POS_ATTR_NAME);
     Position endPos = (Position) editingContext.getAttribute(END_POS_ATTR_NAME);
-    return new SpellCheckingProblemInfo(startPos.getOffset(), endPos.getOffset(), 0, null, null);
+    String word = (String) editingContext.getAttribute(MAN_SP_WORD);
+    String lang = (String) editingContext.getAttribute(MAN_SP_LANG);
+    return new SpellCheckingProblemInfo(startPos.getOffset(), endPos.getOffset(), 0, lang, word);
   }
 
   /**
@@ -287,13 +300,18 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    */
   private String[] findSuggestions(WebappSpellchecker spellchecker, SpellCheckingProblemInfo nextProblem)
       throws AuthorOperationException {
-    String[] suggestions = new String[0];
-    try {
-      SpellSuggestionsInfo suggestionInfo = 
-          spellchecker.getSuggestionsForWordAtPosition(nextProblem.getStartOffset() + 1);
-      suggestions = suggestionInfo.getSuggestions();
-    } catch (Exception e) {
-      throw new AuthorOperationException(e.getMessage(), e);
+    String[] suggestions;
+    // Custom spell checker may provide suggestions with the problem info.
+    if (nextProblem.getSuggestions() != null) {
+      suggestions = nextProblem.getSuggestions().toArray(new String[0]);
+    } else {
+      try {
+        SpellSuggestionsInfo suggestionInfo = 
+            spellchecker.getSuggestionsForWordAtPosition(nextProblem.getStartOffset() + 1);
+        suggestions = suggestionInfo.getSuggestions();
+      } catch (Exception e) {
+        throw new AuthorOperationException(e.getMessage(), e);
+      }
     }
     return suggestions;
   }
