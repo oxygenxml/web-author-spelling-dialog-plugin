@@ -137,47 +137,10 @@
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
-       'fromCaret' : true,
        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords(),
        'saveStartPosition': !!saveSpellcheckStartPosition
      }, goog.bind(function(err, resultString) {
-
-       var result;
-       try {
-         result = JSON.parse(resultString);
-       } catch (e) {
-         result = {};
-       }
-
-       var word = result.word;
-       this.wordInput_.value = word || '';
-       if (word) {
-         this.word_ = word;
-         this.language_ = result.language;
-         var suggestions = result.suggestions;
-         if (suggestions) {
-           this.displaySuggestions_(suggestions);
-         }
-         // If selection is now in readonly content, disable replace buttons.
-         this.setSpellCheckButtonsEnabled_(true);
-         var editorReadOnlyStatus = this.editor_.getReadOnlyStatus().isReadOnly();
-         var selectionInReadOnlyContent = sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent);
-         if (editorReadOnlyStatus || selectionInReadOnlyContent) {
-           this.replaceButton_.disabled = true;
-           this.replaceAllButton_.disabled = true;
-         }
-       } else {
-          this.clearSpellCheckSuggestions_();
-
-         this.showInfo_(tr(msgs.NO_SPELLING_ERRORS_FOUND_));
-       }
-
-       sync.view.SelectionView.renderSelectionPlaceholder(sync.select.getSelection());
-       // Consider only non-empty selection placeholder chunks for the dialog overlap check.
-       var selectedMarkerChunks = document.querySelectorAll('.selection-placeholder:not(.caret-placeholder)');
-       this.scrollIntoViewIfNeeded_(selectedMarkerChunks);
-       this.makeTransparentIfOverSelected_(selectedMarkerChunks);
-       this.replaceInput_.focus();
+      this.processNextProblemFindResult_(resultString);
     }, this));
  };
 
@@ -224,7 +187,7 @@
   SpellcheckAction.prototype.showDialog_ = function () {
     var dialog = this.dialog_;
     if (!dialog) {
-      dialog = workspace.createDialog('manual-spellcheck');
+      dialog = workspace.createDialog('manual-spellcheck', true);
       dialog.setPreferredSize(370, 340);
       dialog.setHasTitleCloseButton(true);
       dialog.setBackgroundElementOpacity(0);
@@ -341,39 +304,75 @@
       } else if (buttonType === 'replace') {
         this.replace_();
       } else if (buttonType === 'replace_all') {
-        sync.rest.callAsync(RESTFindReplaceSupport.replaceAllInDocument, {
-          docId: this.editor_.getController().docId,
-          textToFind: this.word_,
-          textToReplace: this.replaceInput_.value,
-          matchCase: true,
-          wholeWords: true
-        }).then(goog.bind(function (e) {
-          this.editor_.getController().applyUpdate_(e);
-          this.findNext();
-        }, this));
+        this.replace_(true);
       }
     }
   };
 
   /**
    * Replace an error with the selected value.
+   *
+   * @param {boolean} all True to replace all occurrences.
+   *
    * @private
    */
-  SpellcheckAction.prototype.replace_ = function () {
-    var selection = sync.select.getSelection();
-    var selectionStartRelativePosition = selection.start.toRelativeContentPosition();
-    var replaceAction = new sync.spellcheck.SpellCheckReplaceAction(
-      this.editor_.getController(),
-      -1,
-      -1,
-      this.word_,
-      this.replaceInput_.value,
-      selectionStartRelativePosition
-    );
-    replaceAction.actionPerformed(goog.bind(function () {
-      this.replaceInput_.focus();
-      this.findNext();
-    }, this));
+  SpellcheckAction.prototype.replace_ = function (all) {
+    sync.view.SelectionView.clearSelectionPlaceholder();
+    var actionsManager = this.editor_.getActionsManager();
+    actionsManager.invokeOperation(
+      'com.oxygenxml.webapp.plugins.spellcheck.ReplaceAndFindNextSpellingOperation', {
+        'oldWord': this.word_,
+        'newWord': this.replaceInput_.value,
+        'replaceAll' : all,
+        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
+      }, goog.bind(function(err, resultString) {
+        this.processNextProblemFindResult_(resultString);
+      }, this));
+  };
+
+  /**
+   * Process the result of finding next spellcheck problem.
+   *
+   * @param {String} nextProblemDescrString Next spellcheck problem descriptor.
+   *
+   * @private
+   */
+  SpellcheckAction.prototype.processNextProblemFindResult_ = function(nextProblemDescrString) {
+    var nextSpellCheckDescr;
+    try {
+      nextSpellCheckDescr = JSON.parse(nextProblemDescrString);
+    } catch (e) {
+      nextSpellCheckDescr = {};
+    }
+
+    var word = nextSpellCheckDescr.word;
+    this.wordInput_.value = word || '';
+    if (word) {
+      this.word_ = word;
+      this.language_ = nextSpellCheckDescr.language;
+      var suggestions = nextSpellCheckDescr.suggestions;
+      if (suggestions) {
+        this.displaySuggestions_(suggestions);
+      }
+      // If selection is now in readonly content, disable replace buttons.
+      this.setSpellCheckButtonsEnabled_(true);
+      var editorReadOnlyStatus = this.editor_.getReadOnlyStatus().isReadOnly();
+      var selectionInReadOnlyContent = sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent);
+      if (editorReadOnlyStatus || selectionInReadOnlyContent) {
+        this.replaceButton_.disabled = true;
+        this.replaceAllButton_.disabled = true;
+      }
+    } else {
+      this.clearSpellCheckSuggestions_();
+      this.showInfo_(tr(msgs.NO_SPELLING_ERRORS_FOUND_));
+    }
+
+    sync.view.SelectionView.renderSelectionPlaceholder(sync.select.getSelection());
+    // Consider only non-empty selection placeholder chunks for the dialog overlap check.
+    var selectedMarkerChunks = document.querySelectorAll('.selection-placeholder:not(.caret-placeholder)');
+    this.scrollIntoViewIfNeeded_(selectedMarkerChunks);
+    this.makeTransparentIfOverSelected_(selectedMarkerChunks);
+    this.replaceInput_.focus();
   };
 
   /**

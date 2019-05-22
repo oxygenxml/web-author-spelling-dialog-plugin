@@ -34,27 +34,23 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    * Logger.
    */
   Logger logger = Logger.getLogger(GoToNextSpellingErrorOperation.class);
-  
   /**
    * Attribute name for the start position of the last spelling error.
    */
   private static final String START_POS_ATTR_NAME = "com.oxygenxml.plugins.spellcheck.startPos";
-  
   /**
    * Attribute name for the end position of the last spelling error.
    */
   private static final String END_POS_ATTR_NAME = "com.oxygenxml.plugins.spellcheck.endPos";
-  
   /**
    * Attribute name for the start position when the dialog was open.
    */
   private static final String MAN_SP_START = "com.oxygen.plugins.spellcheck.spellcheckStartPos";
-  
   /**
    * Save wrapped status.
    */
   private static final String MAN_SP_WRAPPED = "com.oxygen.plugins.spellcheck.wrapped";
-  
+
   /**
    * Save last checked word.
    */
@@ -69,15 +65,19 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
   public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args)
       throws AuthorOperationException {
     String result = null;
-    boolean saveStartPosition = (Boolean)args.getArgumentValue("saveStartPosition");
-    boolean fromCaret = (Boolean)args.getArgumentValue("fromCaret");
+    
+    boolean saveStartPosition = false;
+    Object saveStartArg = args.getArgumentValue("saveStartPosition");
+    if (saveStartArg instanceof Boolean) {
+      saveStartPosition = (boolean) saveStartArg;
+    }
     
     IgnoredWords ignoredWords = 
         IgnoredWords.fromUncheckedArgument(args.getArgumentValue("ignoredWords"));
     WebappSpellchecker spellchecker = docModel.getSpellchecker();
     
     Optional<SpellCheckingProblemInfo> maybeNextProblem = 
-        findNextProblem(docModel, fromCaret, ignoredWords);
+        findNextProblem(docModel, true, ignoredWords);
     
     if (maybeNextProblem.isPresent()) {
       boolean wrapped = false;
@@ -123,7 +123,6 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
         throw new AuthorOperationException(e.getMessage(), e);
       }
     }
-    
     return result;
   }
 
@@ -281,11 +280,33 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    */
   private SpellCheckingProblemInfo getPreviousProblem(AuthorDocumentModel model) {
     EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
-    Position startPos = (Position) editingContext.getAttribute(START_POS_ATTR_NAME);
-    Position endPos = (Position) editingContext.getAttribute(END_POS_ATTR_NAME);
+    Position startPos = getStartPositionOfLastError(model);
+    Position endPos = getEndPositionOfLastError(model);
     String word = (String) editingContext.getAttribute(MAN_SP_WORD);
     String lang = (String) editingContext.getAttribute(MAN_SP_LANG);
     return new SpellCheckingProblemInfo(startPos.getOffset(), endPos.getOffset(), 0, lang, word);
+  }
+
+  /**
+   * Get the end position of the last spelling error
+   * 
+   * @param model Author document model 
+   * @return the end position.
+   */
+  public Position getEndPositionOfLastError(AuthorDocumentModel model) {
+    EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
+    return (Position) editingContext.getAttribute(END_POS_ATTR_NAME);
+  }
+
+  /**
+   * Get the start position of the last spelling error.
+   * 
+   * @param model Author document model.
+   * @return the start position.
+   */
+  public Position getStartPositionOfLastError(AuthorDocumentModel model) {
+    EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
+    return (Position) editingContext.getAttribute(START_POS_ATTR_NAME);
   }
 
   /**
@@ -305,13 +326,13 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
     if (nextProblem.getSuggestions() != null) {
       suggestions = nextProblem.getSuggestions().toArray(new String[0]);
     } else {
-      try {
-        SpellSuggestionsInfo suggestionInfo = 
-            spellchecker.getSuggestionsForWordAtPosition(nextProblem.getStartOffset() + 1);
-        suggestions = suggestionInfo.getSuggestions();
-      } catch (Exception e) {
-        throw new AuthorOperationException(e.getMessage(), e);
-      }
+    try {
+      SpellSuggestionsInfo suggestionInfo = 
+          spellchecker.getSuggestionsForWordAtPosition(nextProblem.getStartOffset() + 1);
+      suggestions = suggestionInfo.getSuggestions();
+    } catch (Exception e) {
+      throw new AuthorOperationException(e.getMessage(), e);
+    }
     }
     return suggestions;
   }
