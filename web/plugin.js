@@ -469,27 +469,31 @@
  };
 
 
- function addToMoreToolbar(editor, actionId) {
-   goog.events.listen(editor, sync.api.Editor.EventTypes.ACTIONS_LOADED, function(e) {
-     var actionsConfig = e.actionsConfiguration;
+  // Add the action to the built-in toolbar, if the editor can support it.
+  function addToMoreToolbar(editor, actionId) {
+    goog.events.listen(editor, sync.api.Editor.EventTypes.ACTIONS_LOADED, function(e) {
+      var editingSupport = editor.getEditingSupport();
+      if (editingSupport && editingSupport.getType() === sync.api.Editor.EditorTypes.AUTHOR) {
+        var actionsConfig = e.actionsConfiguration;
 
-     var builtinToolbar = null;
-     if (actionsConfig.toolbars) {
-       for (var i = 0; i < actionsConfig.toolbars.length; i++) {
-         var toolbar = actionsConfig.toolbars[i];
-         if (toolbar.name === "Builtin") {
-           builtinToolbar = toolbar;
-         }
-       }
-     }
+        var builtinToolbar = null;
+        if (actionsConfig.toolbars) {
+          for (var i = 0; i < actionsConfig.toolbars.length; i++) {
+            var toolbar = actionsConfig.toolbars[i];
+            if (toolbar.name === "Builtin") {
+              builtinToolbar = toolbar;
+            }
+          }
+        }
 
-     if (builtinToolbar) {
-       var moreElement = goog.array.find(builtinToolbar.children, function (el) { return el.name === 'More...' });
-       goog.array.insertBefore(builtinToolbar.children, {
-         id: actionId,
-         type: "action"
-       }, moreElement);
-     }
-   });
- }
+        if (builtinToolbar) {
+          var moreElement = goog.array.find(builtinToolbar.children, function (el) { return el.name === 'More...' });
+          goog.array.insertBefore(builtinToolbar.children, {
+            id: actionId,
+            type: "action"
+          }, moreElement);
+        }
+      }
+    });
+  }
 })();
