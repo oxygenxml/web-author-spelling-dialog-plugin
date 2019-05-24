@@ -350,7 +350,18 @@
         'replaceAll' : all,
         'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
       }, goog.bind(function(err, resultString) {
-        this.processNextProblemFindResult_(resultString, true);
+        var result = JSON.parse(resultString);
+        if (result.wordChanged) {
+          var dialog = workspace.createDialog();
+          dialog.setTitle(tr(msgs.SPELL_CHECK_ACTION_));
+          goog.dom.appendChild(dialog.getElement(),
+            goog.dom.createDom('div', '', tr(msgs.THE_WORD_HAS_CHANGED_)));
+          dialog.setButtonConfiguration(sync.api.Dialog.ButtonConfiguration.OK);
+          dialog.onSelect(goog.bind(this.findNext, this));
+          dialog.show();
+        } else {
+          this.processNextProblemFindResult_(resultString, true);
+        }
       }, this));
   };
 

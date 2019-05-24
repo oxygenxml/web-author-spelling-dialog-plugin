@@ -43,6 +43,11 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
    */
   public static final String IGNORED_WORDS_ARGUMENT_NAME = "ignoredWords";
   
+  /**
+   * Word changed response
+   */
+  private static final String WORD_CHANGED_RESPONSE = "{\"wordChanged\" :true}";
+  
 
   @Override
   public String doOperation(AuthorDocumentModel model, ArgumentsMap args) throws AuthorOperationException {
@@ -54,11 +59,41 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
     if (isReplaceAll(args)) {
       replaceAll(model, currentWordInfo.getWord(), newWord);      
     } else {
-      replace(model, currentWordInfo.getWord(), newWord, currentWordInfo.getStartPosition(), 
-          currentWordInfo.getEndPosition());
+      Position startPosition = currentWordInfo.getStartPosition();
+      Position endPosition = currentWordInfo.getEndPosition();
+
+      String oldWord = getOldWord(model, startPosition, endPosition);
+      if (!currentWordInfo.getWord().equals(oldWord)) {
+        return WORD_CHANGED_RESPONSE;
+      }
+      
+      replace(model, newWord, startPosition, endPosition);
     } 
 
     return new GoToNextSpellingErrorOperation().doOperation(model, args);
+  }
+
+  /**
+   * Get the old word.
+   * 
+   * @param model The Author document model.
+   * @param startPosition The word start position.
+   * @param endPosition The word end position.
+   * @return
+   * @throws AuthorOperationException 
+   */
+  private String getOldWord(AuthorDocumentModel model, Position startPosition,
+      Position endPosition) throws AuthorOperationException {
+    String oldWord = null;
+    try {
+      Segment chars = new Segment();
+      model.getAuthorDocumentController().getChars(startPosition.getOffset(), 
+          endPosition.getOffset() - startPosition.getOffset() + 1, chars);
+      oldWord = chars.toString();
+    } catch (BadLocationException e) {
+      logger.error(e);
+    }
+    return oldWord;
   }
 
   /**
@@ -81,37 +116,18 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
    * Replace word.
    * 
    * @param model Author document model.
-   * @param oldWord Word to be replaced.
    * @param newWord Word to replace with.
    * @param startPosition The start position of the last spelling error.
    * @param endPosition The end position of the last spelling error.
-   * 
-   * @throws AuthorOperationException
    */
-  private void replace(AuthorDocumentModel model, String oldWord, String newWord, 
-      Position startPosition, Position endPosition) 
-      throws AuthorOperationException {
+  private void replace(AuthorDocumentModel model, String newWord, 
+      Position startPosition, Position endPosition) {
     int startOffset = startPosition.getOffset();
     int endOffset = endPosition.getOffset();
 
-    Segment chars = new Segment();
-    try {
-      model.getAuthorDocumentController().getChars(startOffset, endOffset - startOffset + 1, chars);
-      // Check if word was not modified.
-      if (oldWord.equals(chars.toString())){
-        model.getAuthorDocumentController().delete(startOffset, endOffset);
-        model.getAuthorDocumentController().insertText(startOffset, newWord);
-        model.getSelectionModel().moveTo(startOffset + newWord.length());
-      } else {
-        AuthorOperationException authorOperationException = new AuthorOperationException(
-            "The word has changed since the spelling error was detected.");
-        authorOperationException.setOperationRejectedOnPurpose(true);
-        throw authorOperationException;
-      }
-    } catch (BadLocationException e) {
-      logger.error(e);
-      throw new AuthorOperationException("Replace operation failed: " + e.getMessage());
-    }
+    model.getAuthorDocumentController().delete(startOffset, endOffset);
+    model.getAuthorDocumentController().insertText(startOffset, newWord);
+    model.getSelectionModel().moveTo(startOffset + newWord.length());
   }
 
   /**

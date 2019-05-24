@@ -7,6 +7,14 @@
         <language description="Japanese" lang="ja_JP"/>
         <language description="Dutch" lang="nl_NL"/>
     </languageList>
+    <key value="THE_WORD_HAS_CHANGED_">
+        <comment>Message displayed when the replace cannot be performed because the word has changed.</comment>
+        <val lang="en_US">The replace operation cannot be performed because the word has changed.</val>
+        <val lang="de_DE">The replace operation cannot be performed because the word has changed.</val>
+        <val lang="fr_FR">The replace operation cannot be performed because the word has changed.</val>
+        <val lang="ja_JP">The replace operation cannot be performed because the word has changed.</val>
+        <val lang="nl_NL">The replace operation cannot be performed because the word has changed.</val>
+    </key>
     <key value="NO_SPELLING_ERRORS_FOUND_">
         <comment>Message displayed when no spelling errors were found.</comment>
         <val lang="en_US">No spelling errors were found.</val>
