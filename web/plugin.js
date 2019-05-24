@@ -283,6 +283,15 @@
   };
 
   /**
+   * Clear spellcheck context information.
+   *
+   * @private
+   */
+  SpellcheckAction.prototype.clearSpellcheckContextInformation_ = function() {
+    this.editor_.getActionsManager().invokeOperation('com.oxygenxml.webapp.plugins.spellcheck.ClearSpellingContextInformationOperation', {});
+  };
+
+  /**
    * Handle click in the buttons column.
    * @param {goog.events.EventType.CLICK} e The click event.
    * @private
@@ -294,7 +303,7 @@
       var buttonType = goog.dom.dataset.get(button, 'spButton');
       if (buttonType === 'ignore') {
         // just go to next marker.
-        this.findNext();
+        this.ignore_();
       } else if (buttonType === 'ignore_all') {
         var language = this.language_;
         var word = this.word_;
@@ -310,6 +319,22 @@
   };
 
   /**
+   * Ignore current spellcheck problem.
+   *
+   * @private
+   */
+  SpellcheckAction.prototype.ignore_ = function () {
+    sync.view.SelectionView.clearSelectionPlaceholder();
+    this.editor_.getActionsManager().invokeOperation(
+      'com.oxygenxml.webapp.plugins.spellcheck.IgnoreCurrentAndFindNextSpellingOperation', {
+        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
+      },
+      goog.bind(function(err, resultString) {
+        this.processNextProblemFindResult_(resultString, true);
+      }, this));
+  };
+
+  /**
    * Replace an error with the selected value.
    *
    * @param {boolean} all True to replace all occurrences.
@@ -318,15 +343,13 @@
    */
   SpellcheckAction.prototype.replace_ = function (all) {
     sync.view.SelectionView.clearSelectionPlaceholder();
-    var actionsManager = this.editor_.getActionsManager();
-    actionsManager.invokeOperation(
+    this.editor_.getActionsManager().invokeOperation(
       'com.oxygenxml.webapp.plugins.spellcheck.ReplaceAndFindNextSpellingOperation', {
-        'oldWord': this.word_,
         'newWord': this.replaceInput_.value,
         'replaceAll' : all,
         'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
       }, goog.bind(function(err, resultString) {
-        this.processNextProblemFindResult_(resultString);
+        this.processNextProblemFindResult_(resultString, true);
       }, this));
   };
 
@@ -337,7 +360,8 @@
    *
    * @private
    */
-  SpellcheckAction.prototype.processNextProblemFindResult_ = function(nextProblemDescrString) {
+  SpellcheckAction.prototype.processNextProblemFindResult_ = function(nextProblemDescrString, retry) {
+    sync.view.SelectionView.clearSelectionPlaceholder();
     var nextSpellCheckDescr;
     try {
       nextSpellCheckDescr = JSON.parse(nextProblemDescrString);
@@ -395,6 +419,7 @@
   SpellcheckAction.prototype.beforeHide_ = function () {
     // Save dialog sizes and position for the next time it gets shown.
     sync.view.SelectionView.clearSelectionPlaceholder();
+    this.clearSpellcheckContextInformation_();
     this.dialogOpenHandler_.removeAll();
   };
 

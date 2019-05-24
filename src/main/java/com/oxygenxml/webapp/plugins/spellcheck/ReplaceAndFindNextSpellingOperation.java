@@ -13,6 +13,9 @@ import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
 import ro.sync.ecss.extensions.api.webapp.WebappRestSafe;
 import ro.sync.ecss.extensions.api.webapp.findreplace.WebappFindOptions;
 
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckWordInfo;
+
 /**
  * Replace current spelling error and find next problem.
  * 
@@ -29,11 +32,6 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
    * Attribute name for the "replace all" option.
    */
   private static final String REPLACE_ALL_ARGUMENT_NAME = "replaceAll";
-
-  /**
-   * Attribute name for the old word (to be replaced).
-   */
-  private static final String OLD_WORD_ARGUMENT_NAME = "oldWord";
   
   /**
    * Attribute name for new word (to replace with).
@@ -48,21 +46,19 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
 
   @Override
   public String doOperation(AuthorDocumentModel model, ArgumentsMap args) throws AuthorOperationException {
-    GoToNextSpellingErrorOperation findNextOperation = new GoToNextSpellingErrorOperation();
-    
-    String oldWord = (String)args.getArgumentValue(OLD_WORD_ARGUMENT_NAME);
     String newWord = (String)args.getArgumentValue(NEW_WORD_ARGUMENT_NAME);
     
+    SpellcheckContext spellcheckContext = new SpellcheckContext(model);
+    SpellcheckWordInfo currentWordInfo = spellcheckContext.getCurrentWord();
+    
     if (isReplaceAll(args)) {
-      replaceAll(model, oldWord, newWord);      
+      replaceAll(model, currentWordInfo.getWord(), newWord);      
     } else {
-      Position startPosition = findNextOperation.getStartPositionOfLastError(model);
-      Position endPosition = findNextOperation.getEndPositionOfLastError(model);
-      
-      replace(model, oldWord, newWord, startPosition, endPosition);
+      replace(model, currentWordInfo.getWord(), newWord, currentWordInfo.getStartPosition(), 
+          currentWordInfo.getEndPosition());
     } 
 
-    return findNextOperation.doOperation(model, args);
+    return new GoToNextSpellingErrorOperation().doOperation(model, args);
   }
 
   /**
@@ -107,7 +103,10 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
         model.getAuthorDocumentController().insertText(startOffset, newWord);
         model.getSelectionModel().moveTo(startOffset + newWord.length());
       } else {
-        throw new AuthorOperationException("Document changed since replace operation started.");
+        AuthorOperationException authorOperationException = new AuthorOperationException(
+            "The word has changed since the spelling error was detected.");
+        authorOperationException.setOperationRejectedOnPurpose(true);
+        throw authorOperationException;
       }
     } catch (BadLocationException e) {
       logger.error(e);
