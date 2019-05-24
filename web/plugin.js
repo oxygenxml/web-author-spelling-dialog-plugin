@@ -128,7 +128,6 @@
    * Find the next error.
    */
  SpellcheckAction.prototype.findNext = function () {
-   sync.view.SelectionView.clearSelectionPlaceholder();
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
@@ -318,7 +317,6 @@
    * @private
    */
   SpellcheckAction.prototype.ignore_ = function () {
-    sync.view.SelectionView.clearSelectionPlaceholder();
     this.editor_.getActionsManager().invokeOperation(
       'com.oxygenxml.webapp.plugins.spellcheck.IgnoreCurrentAndFindNextSpellingOperation', {
         'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
@@ -336,7 +334,6 @@
    * @private
    */
   SpellcheckAction.prototype.replace_ = function (all) {
-    sync.view.SelectionView.clearSelectionPlaceholder();
     this.editor_.getActionsManager().invokeOperation(
       'com.oxygenxml.webapp.plugins.spellcheck.ReplaceAndFindNextSpellingOperation', {
         'newWord': this.replaceInput_.value,
@@ -366,7 +363,6 @@
    * @private
    */
   SpellcheckAction.prototype.processNextProblemFindResult_ = function(nextProblemDescrString, retry) {
-    sync.view.SelectionView.clearSelectionPlaceholder();
     var nextSpellCheckDescr;
     try {
       nextSpellCheckDescr = JSON.parse(nextProblemDescrString);
@@ -396,12 +392,12 @@
       this.showInfo_(tr(msgs.NO_SPELLING_ERRORS_FOUND_));
     }
 
-    sync.view.SelectionView.renderSelectionPlaceholder(sync.select.getSelection());
+    this.replaceInput_.focus();
+
     // Consider only non-empty selection placeholder chunks for the dialog overlap check.
-    var selectedMarkerChunks = document.querySelectorAll('.selection-placeholder:not(.caret-placeholder)');
+    var selectedMarkerChunks = document.querySelectorAll('.selection-rect:not(.caret-placeholder)');
     this.scrollIntoViewIfNeeded_(selectedMarkerChunks);
     this.makeTransparentIfOverSelected_(selectedMarkerChunks);
-    this.replaceInput_.focus();
   };
 
   /**
@@ -423,7 +419,6 @@
    */
   SpellcheckAction.prototype.beforeHide_ = function () {
     // Save dialog sizes and position for the next time it gets shown.
-    sync.view.SelectionView.clearSelectionPlaceholder();
     this.clearSpellcheckContextInformation_();
     this.dialogOpenHandler_.removeAll();
   };
