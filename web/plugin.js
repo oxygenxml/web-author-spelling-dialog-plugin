@@ -1,12 +1,5 @@
 (function () {
 
-  var cssFile;
-  cssFile = goog.dom.createDom('link');
-  cssFile.rel = "stylesheet";
-  cssFile.type = "text/css";
-  cssFile.href = "../plugin-resources/man-sp/custom.css";
-  goog.dom.appendChild(document.head, cssFile);
-
   var selectedMarkerClass = 'spelling-selected';
  goog.events.listenOnce(workspace, sync.api.Workspace.EventType.EDITOR_LOADED,
      function(e) {

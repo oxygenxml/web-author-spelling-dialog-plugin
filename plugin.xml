@@ -16,4 +16,6 @@
     <librariesFolder name="target/lib" />
   </runtime>
   <extension type="WebappStaticResourcesFolder" path="resources/" href="man-sp/"/>
+  
+  <extension type="AuthorStylesheet" href="resources/custom.css"/>
 </plugin>
