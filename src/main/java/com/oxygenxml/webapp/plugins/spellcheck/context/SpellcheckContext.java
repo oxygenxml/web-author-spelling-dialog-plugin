@@ -1,10 +1,15 @@
 package com.oxygenxml.webapp.plugins.spellcheck.context;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
+import ro.sync.ecss.extensions.api.AuthorDocumentController;
+import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
 import ro.sync.ecss.extensions.api.access.EditingSessionContext;
 import ro.sync.ecss.extensions.api.webapp.AuthorDocumentModel;
 
@@ -21,20 +26,29 @@ public class SpellcheckContext {
   /**
    * Attribute name for the start position when the dialog was open.
    */
-  private static final String SPELLCHECK_START_POSITION = "com.oxygen.plugins.spellcheck.spellcheckStartPos";
-  /**
-   * Attribute name for the start position when the dialog was open.
-   */
   private static final String IGNORED_WORDS_INFO = "com.oxygen.plugins.spellcheck.ignoredWords";
   /**
-   * Save wrapped status.
+   * Positions comparator for ignored words.
    */
-  private static final String WRAPPED_STATUS = "com.oxygen.plugins.spellcheck.wrapped";
+  private static Comparator<SpellcheckWordInfo> ignoredWordsStartPositionsComparator = (SpellcheckWordInfo w1, SpellcheckWordInfo w2) -> {
+    int cResult = 0;
+    Position w1StartPos = w1.getStartPosition();
+    Position w2StartPos = w2.getStartPosition();
+
+    if (!w1StartPos.equals(w2StartPos)) {
+      cResult = w1StartPos.getOffset() - w2StartPos.getOffset();
+    }
+    return cResult;
+  };
   
   /**
    * Editing session context.
    */
   private EditingSessionContext editingContext;
+  /**
+   * Author document controller.
+   */
+  private AuthorDocumentController controller;
   
   /**
    * Constructor.
@@ -43,6 +57,7 @@ public class SpellcheckContext {
    */
   public SpellcheckContext(AuthorDocumentModel model) {
     this.editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
+    this.controller = model.getAuthorDocumentController();
   }
   
   /**
@@ -64,38 +79,23 @@ public class SpellcheckContext {
   }
   
   /**
-   * Set the start position of the spellcheck.
-   * 
-   * @param position Start position for spellcheck.
-   */
-  public void setSpellcheckStartPosition(Position position) {
-    editingContext.setAttribute(SPELLCHECK_START_POSITION, position);
-  }
-  
-  /**
-   * Return the position where the manual spell check started. -1 if not set.
-   * 
-   * @param docModel The document model.
-   * @return The position where the manual spell check started or -1 if not set.
-   */
-  public int getSpellcheckStartOffset() {    
-    Integer spellcheckStartOffset = -1;
-    Position spellcheckStartPosition = (Position) editingContext.getAttribute(SPELLCHECK_START_POSITION);
-    if (spellcheckStartPosition != null) {
-      spellcheckStartOffset = spellcheckStartPosition.getOffset();
-    }
-    return spellcheckStartOffset;
-  }
-  
-  /**
    * Add current word to ignored words.
    * 
    * @param wordInfo The word info.
    */
   public void ignoreCurrentWord() {
     List<SpellcheckWordInfo> ignoredWords = getIgnoredWords();
-    ignoredWords.add(getCurrentWord());
-
+    SpellcheckWordInfo currentWord = getCurrentWord();
+    
+    int index = Collections.binarySearch(ignoredWords, currentWord, ignoredWordsStartPositionsComparator);
+    if(index < 0) {      
+      int insertionPoint = -index - 1;
+      ignoredWords.add(insertionPoint, currentWord);        
+    } else {
+      ignoredWords.remove(index);
+      ignoredWords.add(index, currentWord);
+    }
+    
     editingContext.setAttribute(IGNORED_WORDS_INFO, ignoredWords);
   }
   
@@ -115,37 +115,36 @@ public class SpellcheckContext {
     return ignoredWords;
   }
   
-
-  /**
-   * Get the wrapped status of the current manual spell check session.
-   * 
-   * @return whether the search wrapped in this session.
-   */
-  public boolean getWrappedStatus() {
-    boolean wrappedStatus = false;
-    Object wrappedStatusObject = editingContext.getAttribute(WRAPPED_STATUS);
-    if (wrappedStatusObject != null) {
-      wrappedStatus = (boolean) wrappedStatusObject;
-    }
-    return wrappedStatus;
-  }
-  
-  /**
-   * Remember if the search wraps.
-   * 
-   * @param wrapped The wrap status.
-   */
-  public void setWrappedStatus(boolean wrapped) {
-    editingContext.setAttribute(WRAPPED_STATUS, wrapped);
-  }
-  
   /**
    * Clear all information saved for the current spellcheck context.
    */
   public void clear() {
     editingContext.setAttribute(CURRENT_WORD_INFO, null);
-    editingContext.setAttribute(SPELLCHECK_START_POSITION, null);
     editingContext.setAttribute(IGNORED_WORDS_INFO, null);
-    editingContext.setAttribute(WRAPPED_STATUS, null);
+  }
+
+  /**
+   * Find if a specific problem is ignored. 
+   * 
+   * @param problem The spellcheck problem information
+   * @return <code>true</code> if the spellcheck problem is ignored.
+   * @throws BadLocationException 
+   */
+  public boolean isIgnored(SpellCheckingProblemInfo problem) throws BadLocationException {
+    boolean ignored = false;
+    List<SpellcheckWordInfo> ignoredWords = getIgnoredWords();
+    SpellcheckWordInfo wordInfo = SpellcheckWordInfo.from(problem, controller);
+    
+    int index = Collections.binarySearch(ignoredWords, wordInfo, ignoredWordsStartPositionsComparator);
+    if (index >= 0) {
+      SpellcheckWordInfo matchingWord = ignoredWords.get(index);
+      ignored = matchingWord.equals(wordInfo);
+      if (!ignored) {
+        // It seems that there is an old spellcheck problem registered as ignored
+        // it should be removed 
+        ignoredWords.remove(index);
+      }
+    }
+    return ignored;
   }
 }

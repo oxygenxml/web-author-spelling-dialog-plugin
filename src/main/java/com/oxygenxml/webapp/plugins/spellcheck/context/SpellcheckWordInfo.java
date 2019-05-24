@@ -1,6 +1,10 @@
 package com.oxygenxml.webapp.plugins.spellcheck.context;
 
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
+
+import ro.sync.ecss.extensions.api.AuthorDocumentController;
+import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
 
 /**
  * Information for a spellcheck word error.
@@ -89,5 +93,37 @@ public class SpellcheckWordInfo {
    */
   public String getWord() {
     return word;
+  }
+
+  /**
+   * Create a {@link SpellcheckWordInfo} from a {@link SpellCheckingProblemInfo}
+   * 
+   * @param problem The problem.
+   * @param controller The controller.
+   * @return The word info.
+   * @throws BadLocationException 
+   */
+  public static SpellcheckWordInfo from(SpellCheckingProblemInfo problem, AuthorDocumentController controller) 
+      throws BadLocationException {
+    SpellcheckWordInfo wordInfo = new SpellcheckWordInfo();
+    wordInfo.setStartPosition(controller.createPositionInContent(problem.getStartOffset()));
+    wordInfo.setEndPosition(controller.createPositionInContent(problem.getEndOffset()));
+    wordInfo.setWord(problem.getWord());
+    wordInfo.setLanguageIsoName(problem.getLanguageIsoName());
+    
+    return wordInfo;
+  }
+ 
+  @Override
+  public boolean equals(Object obj) {
+    boolean equals = false;
+    if (obj instanceof SpellcheckWordInfo) {
+      SpellcheckWordInfo wordInfo = (SpellcheckWordInfo) obj;
+      equals = wordInfo.getStartPosition().getOffset() == this.getStartPosition().getOffset() && 
+          wordInfo.getEndPosition().getOffset() == this.getEndPosition().getOffset() &&
+          wordInfo.getWord().equals(this.getWord()) && 
+          wordInfo.getLanguageIsoName().equals(this.getLanguageIsoName());
+    } 
+    return equals;
   }
 }

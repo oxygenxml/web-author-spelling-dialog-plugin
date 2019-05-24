@@ -130,15 +130,13 @@
 
   /**
    * Find the next error.
-   * @param saveSpellcheckStartPosition Whether this is the first request after the dialog is shown.
    */
- SpellcheckAction.prototype.findNext = function (saveSpellcheckStartPosition) {
+ SpellcheckAction.prototype.findNext = function () {
    sync.view.SelectionView.clearSelectionPlaceholder();
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords(),
-       'saveStartPosition': !!saveSpellcheckStartPosition
      }, goog.bind(function(err, resultString) {
       this.processNextProblemFindResult_(resultString);
     }, this));
@@ -464,7 +462,7 @@
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
    this.showDialog_();
-   this.findNext(true);
+   this.findNext();
    callback && callback();
  };
 

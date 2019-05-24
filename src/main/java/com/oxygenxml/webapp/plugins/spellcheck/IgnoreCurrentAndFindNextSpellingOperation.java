@@ -7,6 +7,7 @@ import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
 import ro.sync.ecss.extensions.api.webapp.WebappRestSafe;
 
 import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckWordInfo;
 
 /**
  * Ignore current spelling error and find next problem.
@@ -25,6 +26,9 @@ public class IgnoreCurrentAndFindNextSpellingOperation extends AuthorOperationWi
   public String doOperation(AuthorDocumentModel model, ArgumentsMap args) throws AuthorOperationException {
     SpellcheckContext spellcheckContext = new SpellcheckContext(model); 
     spellcheckContext.ignoreCurrentWord();
+    
+    SpellcheckWordInfo currentWord = spellcheckContext.getCurrentWord();
+    model.getSelectionModel().moveTo(currentWord.getStartPosition().getOffset() + currentWord.getWord().length());
 
     return new GoToNextSpellingErrorOperation().doOperation(model, args);
   }

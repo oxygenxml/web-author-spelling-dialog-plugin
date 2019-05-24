@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.text.BadLocationException;
+
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
+
 import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
 
 /**
@@ -17,12 +21,18 @@ public class IgnoredWords {
   /**
    * Ignored words per language.
    */
-  private final Map<String, List<?>> ingoredWordsTyped = new HashMap<String, List<?>>();;
+  private final Map<String, List<?>> ingoredWordsTyped = new HashMap<>();
+  /**
+   * The spellcheck context.
+   */
+  private SpellcheckContext spellcheckContext;
 
   /**
    * Private constructor - use the factory method.
+   * @param spellcheckContext The spellcheck context.
    */
-  private IgnoredWords() {
+  private IgnoredWords(SpellcheckContext spellcheckContext) {
+    this.spellcheckContext = spellcheckContext;
   }
   
   /**
@@ -31,25 +41,28 @@ public class IgnoredWords {
    * @param problem The spell checking problem,
    * 
    * @return <code>true</code> if the problem is ignored.
+   * @throws BadLocationException 
    */
-  public boolean isIgnored(SpellCheckingProblemInfo problem) {
+  public boolean isIgnored(SpellCheckingProblemInfo problem) throws BadLocationException {
     String canonicalLang = getCanonicalLanguage(problem.getLanguageIsoName());
     List<?> ignoredWordsForLang = 
         ingoredWordsTyped.getOrDefault(canonicalLang, Collections.emptyList());
-    return ignoredWordsForLang.contains(problem.getWord());
+    return ignoredWordsForLang.contains(problem.getWord()) || spellcheckContext.isIgnored(problem);
   }
   
   /**
    * Constructs a set of ignored objects from an unchecked argument sent from client-side.
    * 
    * @param ignoredWordsArg The argument.
+   * @param spellcheckContext The spellcheck context. 
    * 
    * @return The instance.
    * 
    * @throws IllegalArgumentException if the argument does not have the expected shape.
    */
-  public static IgnoredWords fromUncheckedArgument(Object ignoredWordsArg) {
-    IgnoredWords ignoredWordsObj = new IgnoredWords();
+  public static IgnoredWords fromUncheckedArgument(Object ignoredWordsArg, 
+      SpellcheckContext spellcheckContext) {
+    IgnoredWords ignoredWordsObj = new IgnoredWords(spellcheckContext);
     try {
       Map<?, ?> ignoredWordsUntyped = (Map<?, ?>) ignoredWordsArg;
       for (Map.Entry<?, ?> entry: ignoredWordsUntyped.entrySet()) {

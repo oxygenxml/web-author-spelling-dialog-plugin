@@ -5,14 +5,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import javax.swing.text.BadLocationException;
 
-import com.google.common.base.MoreObjects;
+import org.apache.log4j.Logger;
 
 import ro.sync.ecss.extensions.api.AuthorOperationException;
 import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
 import ro.sync.ecss.extensions.api.webapp.WebappSpellchecker;
 import ro.sync.exml.workspace.api.util.TextChunkDescriptor;
+
+import com.google.common.base.MoreObjects;
 
 /**
  * Class used to spellcheck an interval.
@@ -119,7 +121,7 @@ public class SpellcheckPerformer {
             // It will be found again in the next interval.  
           }
         }
-      } catch (IOException e) {
+      } catch (IOException | BadLocationException e) {
         throw new AuthorOperationException(e.getMessage(), e);
       }
     }

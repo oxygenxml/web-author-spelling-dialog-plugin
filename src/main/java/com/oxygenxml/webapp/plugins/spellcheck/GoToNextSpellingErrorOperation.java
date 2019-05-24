@@ -34,124 +34,83 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    * Logger.
    */
   Logger logger = Logger.getLogger(GoToNextSpellingErrorOperation.class);
-  
-  /**
-   * Spellcheck context.
-   */
-  private SpellcheckContext spellcheckContext;
 
   @Override
-  public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args)
+  public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args) 
       throws AuthorOperationException {
     String result = null;
-    
-    this.spellcheckContext = new SpellcheckContext(docModel);
-    
-    boolean saveStartPosition = false;
-    Object saveStartArg = args.getArgumentValue("saveStartPosition");
-    if (saveStartArg instanceof Boolean) {
-      saveStartPosition = (boolean) saveStartArg;
-    }
-    
-    IgnoredWords ignoredWords = 
-        IgnoredWords.fromUncheckedArgument(args.getArgumentValue("ignoredWords"));
-    WebappSpellchecker spellchecker = docModel.getSpellchecker();
-    
-    Optional<SpellCheckingProblemInfo> maybeNextProblem = 
-        findNextProblem(docModel, true, ignoredWords);
-    
-    if (maybeNextProblem.isPresent()) {
-      boolean wrapped = false;
+    try {
+      SpellcheckContext spellcheckContext = new SpellcheckContext(docModel);
+
+      IgnoredWords ignoredWords = IgnoredWords.fromUncheckedArgument(
+          args.getArgumentValue("ignoredWords"), spellcheckContext);
+      WebappSpellchecker spellchecker = docModel.getSpellchecker();
       
-      SpellCheckingProblemInfo nextProblem = maybeNextProblem.get();
-      if (saveStartPosition) {
-        saveSpellcheckStartPosition(nextProblem.getStartOffset(), docModel.getAuthorDocumentController());
-        // If first search it could not have wrapped.
-        // This covers the case when the first error comes after a wrap.
-        spellcheckContext.setWrappedStatus(false);
-      } else {
-        // This is not the first search.
-        SpellCheckingProblemInfo previousProblem = getPreviousProblem();
-        if (isProbablySameProblem(previousProblem, nextProblem) || 
-            previousProblem.getStartOffset() > nextProblem.getStartOffset()) {
-          spellcheckContext.setWrappedStatus(true);
-        }
-        
-        wrapped = spellcheckContext.getWrappedStatus();
-        int spellcheckStartPosition = spellcheckContext.getSpellcheckStartOffset();
-        if (wrapped && spellcheckStartPosition != -1 && nextProblem.getStartOffset() >= spellcheckStartPosition) {
-          return result;
-        }
+      Optional<SpellCheckingProblemInfo> maybeNextProblem = 
+          findNextProblem(docModel, ignoredWords, spellcheckContext);
+      
+      if (maybeNextProblem.isPresent()) {
+        SpellCheckingProblemInfo nextProblem = maybeNextProblem.get();
+        AuthorDocumentController controller = docModel.getAuthorDocumentController();
+        // Save informations about the current word
+        spellcheckContext.setCurrentWordInfo(SpellcheckWordInfo.from(nextProblem, controller));
+        // Select the next spelling error.
+        docModel.getSelectionModel().setSelection(nextProblem.getStartOffset(), nextProblem.getEndOffset() + 1);
+        String[] suggestions = findSuggestions(spellchecker, nextProblem);
+        result = getFindResult(nextProblem, suggestions);
       }
-      
-      saveCurrentProblem(nextProblem, docModel.getAuthorDocumentController());
-      
-      // Select the next spelling error.
-      docModel.getSelectionModel().setSelection(
-          nextProblem.getStartOffset(), nextProblem.getEndOffset() + 1);
-      
-      String[] suggestions = findSuggestions(spellchecker, nextProblem);
-      
-      try {
-        ObjectMapper objectMapper = new ObjectMapper();
-        result = objectMapper.writeValueAsString(ImmutableMap.of(
-            "word", nextProblem.getWord(),
-            "language", nextProblem.getLanguageIsoName(),
-            "startOffset", nextProblem.getStartOffset(),
-            "endOffset", nextProblem.getEndOffset(),
-            "suggestions", suggestions));
-      } catch (IOException e) {
-        throw new AuthorOperationException(e.getMessage(), e);
-      }
+
+    } catch (BadLocationException e) {
+      throw new AuthorOperationException(e.getMessage(), e);
     }
     return result;
   }
 
   /**
-   * Check if two problems are likely to be the same one.
-   * @param previousProblem The previous problem.
-   * @param nextProblem The next problem.
-   * @return Whether they are likely to be the same problem.
-   */
-  private boolean isProbablySameProblem(SpellCheckingProblemInfo previousProblem, 
-      SpellCheckingProblemInfo nextProblem) {
-    return previousProblem.getStartOffset() == nextProblem.getStartOffset() &&
-        previousProblem.getEndOffset() == nextProblem.getEndOffset() &&
-        previousProblem.getWord().equals(nextProblem.getWord()) &&
-        previousProblem.getLanguageIsoName().equals(nextProblem.getLanguageIsoName());
-  }
-
-  /**
-   * Save the position of the first error found in this session of manual spell check.
+   * Get the result of finding next problem.
    * 
-   * @param spellcheckStartPos The start position of the first error.
+   * @param nextProblem Next problem
+   * @param suggestions Suggestion
+   * @return
    * @throws AuthorOperationException
    */
-  private void saveSpellcheckStartPosition(int spellcheckStartPos, AuthorDocumentController controller) throws AuthorOperationException {
+  private String getFindResult(SpellCheckingProblemInfo nextProblem, String[] suggestions) throws AuthorOperationException {
+    String result = null;
     try {
-      spellcheckContext.setSpellcheckStartPosition(controller.createPositionInContent(spellcheckStartPos));
-    } catch (BadLocationException e) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      result = objectMapper.writeValueAsString(ImmutableMap.of(
+          "word", nextProblem.getWord(),
+          "language", nextProblem.getLanguageIsoName(),
+          "startOffset", nextProblem.getStartOffset(),
+          "endOffset", nextProblem.getEndOffset(),
+          "suggestions", suggestions));
+    } catch (IOException e) {
       throw new AuthorOperationException(e.getMessage(), e);
     }
+    return result;
   }
-  
+
   /**
    * Save the position of the current spelling error.
    * 
    * @param docModel The document model.
-   * @param fromCaret <code>true</code> to return the next problem from the caret position
    * rather than the last position marked.
    * @param ignoredWords The ignored words.
+   * @param spellcheckContext Spellcheck context.
    * 
    * @return Info about the next spell-checking problem, if any.
    * @throws AuthorOperationException
    */
-  private Optional<SpellCheckingProblemInfo> findNextProblem(AuthorDocumentModel docModel, boolean fromCaret, IgnoredWords ignoredWords)
-      throws AuthorOperationException {
+  private Optional<SpellCheckingProblemInfo> findNextProblem(AuthorDocumentModel docModel, 
+      IgnoredWords ignoredWords, SpellcheckContext spellcheckContext) throws AuthorOperationException {
     WebappSpellchecker spellchecker = docModel.getSpellchecker();
     AuthorDocument document = docModel.getAuthorDocumentController().getAuthorDocumentNode();
     
-    int startOffset = getStartOffset(docModel, fromCaret);
+    int startOffset = docModel.getSelectionModel().getCaretOffset();
+    SpellcheckWordInfo currentWord = spellcheckContext.getCurrentWord();
+    if (currentWord != null) {
+      startOffset = currentWord.getEndPosition().getOffset();
+    }
     
     SpellcheckPerformer spellcheckPerformer = new SpellcheckPerformer(
         spellchecker, 
@@ -164,62 +123,6 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
       problemInfo = spellcheckPerformer.runSpellcheck(0, startOffset);
     }
     return problemInfo;
-  }
-
-  /**
-   * Return the offset from which we should start the spellchecking.
-   * 
-   * @param docModel the document model.
-   * @param fromCaret <code>true</code> if we should start from the carer pos.
-   * 
-   * @return The start offset.
-   */
-  private int getStartOffset(AuthorDocumentModel docModel, boolean fromCaret) {
-    if (fromCaret) {
-      return docModel.getSelectionModel().getCaretOffset();
-    } else {
-      return spellcheckContext.getSpellcheckStartOffset();
-    }
-  }
-
-  /**
-   * Saves the current spelling problem so that we can resume from it the next time.
-   * 
-   * @param currentProblem The current problem.
-   * @param controller The Author document controller
-   * 
-   * @throws AuthorOperationException
-   */
-  private void saveCurrentProblem(SpellCheckingProblemInfo currentProblem, AuthorDocumentController controller)
-      throws AuthorOperationException {
-    try {
-      SpellcheckWordInfo wordInfo = new SpellcheckWordInfo();
-      wordInfo.setStartPosition(controller.createPositionInContent(currentProblem.getStartOffset()));
-      wordInfo.setEndPosition(controller.createPositionInContent(currentProblem.getEndOffset()));
-      wordInfo.setWord(currentProblem.getWord());
-      wordInfo.setLanguageIsoName(currentProblem.getLanguageIsoName());
-      
-      spellcheckContext.setCurrentWordInfo(wordInfo);
-    } catch (BadLocationException e) {
-      throw new AuthorOperationException(e.getMessage(), e);
-    }
-  }
-  
-  /**
-   * Get some information about the previous problem.
-   * It is not a complete problem info object.
-   * 
-   * @return The problem info.
-   */
-  private SpellCheckingProblemInfo getPreviousProblem() {
-    SpellcheckWordInfo currentWordInfo = spellcheckContext.getCurrentWord();
-    
-    return new SpellCheckingProblemInfo(
-        currentWordInfo.getStartPosition().getOffset(), 
-        currentWordInfo.getEndPosition().getOffset(),
-        0, 
-        currentWordInfo.getLanguageIsoName(), 
-        currentWordInfo.getWord());
   }
 
   /**
