@@ -17,5 +17,5 @@
   </runtime>
   <extension type="WebappStaticResourcesFolder" path="resources/" href="man-sp/"/>
   
-  <extension type="AuthorStylesheet" href="resources/custom.css"/>
+  <extension type="WebappCSSResource" href="resources/custom.css"/>
 </plugin>
