@@ -59,6 +59,10 @@
    this.editor_.problemReporter && this.editor_.problemReporter.showInfo(message);
  };
 
+  SpellcheckAction.prototype.showError_ = function (message) {
+    this.editor_.problemReporter && this.editor_.problemReporter.showError(message);
+  };
+
   /**
    * Make sure the selected error is visible - scroll to it and/or expand its fold.
    * @param {NodeList} nodes List of fake selection nodes.
@@ -131,11 +135,26 @@
    var actionsManager = this.editor_.getActionsManager();
    actionsManager.invokeOperation(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
-       'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords(),
+       'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
      }, goog.bind(function(err, resultString) {
-      this.processNextProblemFindResult_(resultString);
+       if (err) {
+         this.handleSpellCheckOperationError_(err);
+       } else {
+         this.processNextProblemFindResult_(resultString);
+       }
     }, this));
  };
+
+  /**
+   * Handle spellcheck operation error
+   *
+   * @param {object} err The error.
+   */
+  SpellcheckAction.prototype.handleSpellCheckOperationError_ = function(err) {
+    console.error(err);
+    var errorMessage = tr(msgs.ERROR_COMMUNICATING_WITH_SERVER_);
+    this.editor_.problemReporter && this.editor_.problemReporter.showError(errorMessage);
+  };
 
   /**
    * Clear spellcheck suggestion.
@@ -322,7 +341,11 @@
         'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
       },
       goog.bind(function(err, resultString) {
-        this.processNextProblemFindResult_(resultString, true);
+        if (err) {
+          this.handleSpellCheckOperationError_(err);
+        } else {
+          this.processNextProblemFindResult_(resultString, true);
+        }
       }, this));
   };
 
@@ -340,18 +363,22 @@
         'replaceAll' : all,
         'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
       }, goog.bind(function(err, resultString) {
-        var result = resultString ? JSON.parse(resultString) : {};
-        if (result.wordChanged) {
-          var dialog = workspace.createDialog();
-          dialog.setTitle(tr(msgs.SPELL_CHECK_ACTION_));
-          goog.dom.appendChild(dialog.getElement(),
-            goog.dom.createDom('div', '', tr(msgs.THE_WORD_HAS_CHANGED_)));
-          dialog.setButtonConfiguration(sync.api.Dialog.ButtonConfiguration.OK);
-          dialog.onSelect(goog.bind(this.findNext, this));
-          dialog.getElement().setAttribute('id', 'word-changed-warn-container');
-          dialog.show();
+        if (err) {
+          this.handleSpellCheckOperationError_(err);
         } else {
-          this.processNextProblemFindResult_(resultString, true);
+          var result = resultString ? JSON.parse(resultString) : {};
+          if (result.wordChanged) {
+            var dialog = workspace.createDialog();
+            dialog.setTitle(tr(msgs.SPELL_CHECK_ACTION_));
+            goog.dom.appendChild(dialog.getElement(),
+              goog.dom.createDom('div', '', tr(msgs.THE_WORD_HAS_CHANGED_)));
+            dialog.setButtonConfiguration(sync.api.Dialog.ButtonConfiguration.OK);
+            dialog.onSelect(goog.bind(this.findNext, this));
+            dialog.getElement().setAttribute('id', 'word-changed-warn-container');
+            dialog.show();
+          } else {
+            this.processNextProblemFindResult_(resultString, true);
+          }
         }
       }, this));
   };

@@ -7,6 +7,14 @@
         <language description="Japanese" lang="ja_JP"/>
         <language description="Dutch" lang="nl_NL"/>
     </languageList>
+    <key value="ERROR_COMMUNICATING_WITH_SERVER_">
+        <comment>Message displayed when the replace or find next problem operations throw errors on the server.</comment>
+        <val lang="en_US">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+        <val lang="de_DE">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+        <val lang="fr_FR">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+        <val lang="ja_JP">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+        <val lang="nl_NL">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+    </key>
     <key value="THE_WORD_HAS_CHANGED_">
         <comment>Message displayed when the replace cannot be performed because the word has changed.</comment>
         <val lang="en_US">The replace operation cannot be performed because the word has changed.</val>
