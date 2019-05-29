@@ -2,6 +2,7 @@ package com.oxygenxml.webapp.plugins.spellcheck;
 
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
+import ro.sync.ecss.extensions.api.access.EditingSessionContext;
 import ro.sync.ecss.extensions.api.webapp.AuthorDocumentModel;
 import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
 import ro.sync.ecss.extensions.api.webapp.WebappRestSafe;
@@ -24,12 +25,24 @@ public class IgnoreCurrentAndFindNextSpellingOperation extends AuthorOperationWi
   
   @Override
   public String doOperation(AuthorDocumentModel model, ArgumentsMap args) throws AuthorOperationException {
-    SpellcheckContext spellcheckContext = new SpellcheckContext(model); 
-    spellcheckContext.ignoreCurrentWord();
-    
-    SpellcheckWordInfo currentWord = spellcheckContext.getCurrentWord();
+    SpellcheckWordInfo currentWord = ignoreCurrentWord(model);
     model.getSelectionModel().moveTo(currentWord.getStartPosition().getOffset() + currentWord.getWord().length());
 
     return new GoToNextSpellingErrorOperation().doOperation(model, args);
+  }
+  
+  /**
+   * Add current word to ignored words.
+   * 
+   * @param model Author document model.
+   * @param wordInfo The word info.
+   * @return The ignored word.
+   */
+  public SpellcheckWordInfo ignoreCurrentWord(AuthorDocumentModel model) {
+    EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
+    SpellcheckContext spellcheckContext = (SpellcheckContext) editingContext.getAttribute(SpellcheckContext.SPELLCHECK_CONTEXT_ATTR_NAME);
+    
+    spellcheckContext.ignoreCurrentWord();
+    return spellcheckContext.getCurrentWord();
   }
 }

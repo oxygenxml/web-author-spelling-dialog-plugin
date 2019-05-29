@@ -7,9 +7,10 @@ import java.util.Map;
 
 import javax.swing.text.BadLocationException;
 
-import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
-
+import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
+
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
 
 /**
  * Object holding the currently ignored words.
@@ -39,15 +40,16 @@ public class IgnoredWords {
    * Checks if a word is ignored for a particular language.
    * 
    * @param problem The spell checking problem,
+   * @param controller Author document controller
    * 
    * @return <code>true</code> if the problem is ignored.
    * @throws BadLocationException 
    */
-  public boolean isIgnored(SpellCheckingProblemInfo problem) throws BadLocationException {
+  public boolean isIgnored(SpellCheckingProblemInfo problem, AuthorDocumentController controller) throws BadLocationException {
     String canonicalLang = getCanonicalLanguage(problem.getLanguageIsoName());
     List<?> ignoredWordsForLang = 
         ingoredWordsTyped.getOrDefault(canonicalLang, Collections.emptyList());
-    return ignoredWordsForLang.contains(problem.getWord()) || spellcheckContext.isIgnored(problem);
+    return ignoredWordsForLang.contains(problem.getWord()) || spellcheckContext.isIgnored(problem, controller);
   }
   
   /**

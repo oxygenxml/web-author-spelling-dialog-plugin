@@ -9,6 +9,7 @@ import javax.swing.text.BadLocationException;
 
 import org.apache.log4j.Logger;
 
+import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
 import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
 import ro.sync.ecss.extensions.api.webapp.WebappSpellchecker;
@@ -61,13 +62,14 @@ public class SpellcheckPerformer {
    * 
    * @param startOffset The start offset.
    * @param endOffset The end offset.
+   * @param controller Author document controller
    * 
    * @return The first problem found, or null if everything is ok.
    * 
    * @throws AuthorOperationException
    */
   public Optional<SpellCheckingProblemInfo> runSpellcheck(
-      int startOffset, int endOffset) throws AuthorOperationException {
+      int startOffset, int endOffset, AuthorDocumentController controller) throws AuthorOperationException {
     logger.debug("Checking between " + startOffset + " " + endOffset);
     int interval = 1000;
     
@@ -75,7 +77,7 @@ public class SpellcheckPerformer {
     while (currentOffset < endOffset) {
       int intervalEnd = Math.min(currentOffset + interval, endOffset);
       Optional<SpellCheckingProblemInfo> nextProblem = 
-          runSpellcheckSingleInterval(currentOffset, intervalEnd);
+          runSpellcheckSingleInterval(currentOffset, intervalEnd, controller);
       if (nextProblem.isPresent()) {
         logger.debug("Found: " + nextProblem.get().getWord());
         return nextProblem;
@@ -91,13 +93,14 @@ public class SpellcheckPerformer {
    * 
    * @param start The start offset of the interval.
    * @param end The end offset of the interval.
+   * @param controller Author document controller
    * 
    * @return The first problem found or null if no problems were found.
    * 
    * @throws AuthorOperationException
    */
   private Optional<SpellCheckingProblemInfo> runSpellcheckSingleInterval(
-      int start, int end) throws AuthorOperationException {
+      int start, int end, AuthorDocumentController controller) throws AuthorOperationException {
     logger.debug("Checking interval between " + start + " " + end);
 
     // Run spellcheck on a slightly larger interval and ignore problems
@@ -114,7 +117,7 @@ public class SpellcheckPerformer {
             runSpellcheckTextDescriptor(textDescriptor);
         for (SpellCheckingProblemInfo problem : problems) {
           if (problem.getStartOffset() >= start && problem.getStartOffset() <= end 
-              && !ignoredWords.isIgnored(problem)) {
+              && !ignoredWords.isIgnored(problem, controller)) {
             return Optional.of(problem);
           } else {
             // The given word does not start in our interval. 

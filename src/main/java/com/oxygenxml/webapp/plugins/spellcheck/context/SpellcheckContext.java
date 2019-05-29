@@ -10,23 +10,26 @@ import javax.swing.text.Position;
 
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
-import ro.sync.ecss.extensions.api.access.EditingSessionContext;
-import ro.sync.ecss.extensions.api.webapp.AuthorDocumentModel;
 
 /**
- * Manager for spellcheck context. 
+ * The spellcheck context. 
  * 
  * @author mihaela
  */
 public class SpellcheckContext {
   /**
-   * Attribute name for the start position of the last spelling error.
+   * Attribute name for spellcheck context (that is used to be saved in the editing context)
    */
-  private static final String CURRENT_WORD_INFO = "com.oxygenxml.plugins.spellcheck.currentWord";
+  public static final String SPELLCHECK_CONTEXT_ATTR_NAME = "com.oxygenxml.plugins.spellcheck.context";
   /**
-   * Attribute name for the start position when the dialog was open.
+   * Information for current spellcheck word error.
    */
-  private static final String IGNORED_WORDS_INFO = "com.oxygen.plugins.spellcheck.ignoredWords";
+  private SpellcheckWordInfo currentWordInfo;
+  /**
+   * list of ignored words
+   */
+  private List<SpellcheckWordInfo> ignoredWords = new ArrayList<>();
+  
   /**
    * Positions comparator for ignored words.
    */
@@ -42,31 +45,12 @@ public class SpellcheckContext {
   };
   
   /**
-   * Editing session context.
-   */
-  private EditingSessionContext editingContext;
-  /**
-   * Author document controller.
-   */
-  private AuthorDocumentController controller;
-  
-  /**
-   * Constructor.
-   * 
-   * @param model Author document model.
-   */
-  public SpellcheckContext(AuthorDocumentModel model) {
-    this.editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
-    this.controller = model.getAuthorDocumentController();
-  }
-  
-  /**
    * Set current word info.
    * 
    * @param wordInfo The word info.
    */
   public void setCurrentWordInfo(SpellcheckWordInfo wordInfo) {
-    editingContext.setAttribute(CURRENT_WORD_INFO, wordInfo);
+    this.currentWordInfo = wordInfo;
   }
   
   /**
@@ -75,7 +59,7 @@ public class SpellcheckContext {
    * @return The current word.
    */
   public SpellcheckWordInfo getCurrentWord() {
-    return (SpellcheckWordInfo) editingContext.getAttribute(CURRENT_WORD_INFO);
+    return this.currentWordInfo;
   }
   
   /**
@@ -84,19 +68,16 @@ public class SpellcheckContext {
    * @param wordInfo The word info.
    */
   public void ignoreCurrentWord() {
-    List<SpellcheckWordInfo> ignoredWords = getIgnoredWords();
     SpellcheckWordInfo currentWord = getCurrentWord();
     
-    int index = Collections.binarySearch(ignoredWords, currentWord, ignoredWordsStartPositionsComparator);
+    int index = Collections.binarySearch(this.ignoredWords, currentWord, ignoredWordsStartPositionsComparator);
     if(index < 0) {      
       int insertionPoint = -index - 1;
-      ignoredWords.add(insertionPoint, currentWord);        
+      this.ignoredWords.add(insertionPoint, currentWord);        
     } else {
-      ignoredWords.remove(index);
-      ignoredWords.add(index, currentWord);
+      this.ignoredWords.remove(index);
+      this.ignoredWords.add(index, currentWord);
     }
-    
-    editingContext.setAttribute(IGNORED_WORDS_INFO, ignoredWords);
   }
   
   /**
@@ -104,45 +85,32 @@ public class SpellcheckContext {
    * 
    * @return The ignored words.
    */
-  @SuppressWarnings("unchecked")
   public List<SpellcheckWordInfo> getIgnoredWords() {
-    List<SpellcheckWordInfo> ignoredWords = new ArrayList<>();
-
-    Object ignoredWordsAttribute = editingContext.getAttribute(IGNORED_WORDS_INFO);
-    if (ignoredWordsAttribute instanceof List) {
-      ignoredWords = (List<SpellcheckWordInfo>) ignoredWordsAttribute;
-    } 
-    return ignoredWords;
+    return this.ignoredWords;
   }
   
-  /**
-   * Clear all information saved for the current spellcheck context.
-   */
-  public void clear() {
-    editingContext.setAttribute(CURRENT_WORD_INFO, null);
-    editingContext.setAttribute(IGNORED_WORDS_INFO, null);
-  }
-
   /**
    * Find if a specific problem is ignored. 
    * 
    * @param problem The spellcheck problem information
+   * @param controller The controller.
    * @return <code>true</code> if the spellcheck problem is ignored.
    * @throws BadLocationException 
    */
-  public boolean isIgnored(SpellCheckingProblemInfo problem) throws BadLocationException {
+  public boolean isIgnored(SpellCheckingProblemInfo problem, AuthorDocumentController controller) throws BadLocationException {
     boolean ignored = false;
-    List<SpellcheckWordInfo> ignoredWords = getIgnoredWords();
-    SpellcheckWordInfo wordInfo = SpellcheckWordInfo.from(problem, controller);
-    
-    int index = Collections.binarySearch(ignoredWords, wordInfo, ignoredWordsStartPositionsComparator);
-    if (index >= 0) {
-      SpellcheckWordInfo matchingWord = ignoredWords.get(index);
-      ignored = matchingWord.equals(wordInfo);
-      if (!ignored) {
-        // It seems that there is an old spellcheck problem registered as ignored
-        // it should be removed 
-        ignoredWords.remove(index);
+    if (!this.ignoredWords.isEmpty()) {
+      SpellcheckWordInfo wordInfo = SpellcheckWordInfo.from(problem, controller);
+
+      int index = Collections.binarySearch(this.ignoredWords, wordInfo, ignoredWordsStartPositionsComparator);
+      if (index >= 0) {
+        SpellcheckWordInfo matchingWord = this.ignoredWords.get(index);
+        ignored = matchingWord.equals(wordInfo);
+        if (!ignored) {
+          // It seems that there is an old spellcheck problem registered as ignored
+          // it should be removed 
+          this.ignoredWords.remove(index);
+        }
       }
     }
     return ignored;

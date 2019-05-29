@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
+import ro.sync.ecss.extensions.api.access.EditingSessionContext;
 import ro.sync.ecss.extensions.api.webapp.AuthorDocumentModel;
 import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
 import ro.sync.ecss.extensions.api.webapp.WebappRestSafe;
@@ -53,7 +54,8 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
   public String doOperation(AuthorDocumentModel model, ArgumentsMap args) throws AuthorOperationException {
     String newWord = (String)args.getArgumentValue(NEW_WORD_ARGUMENT_NAME);
     
-    SpellcheckContext spellcheckContext = new SpellcheckContext(model);
+    EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
+    SpellcheckContext spellcheckContext = (SpellcheckContext) editingContext.getAttribute(SpellcheckContext.SPELLCHECK_CONTEXT_ATTR_NAME);
     SpellcheckWordInfo currentWordInfo = spellcheckContext.getCurrentWord();
     
     if (isReplaceAll(args)) {
@@ -80,10 +82,9 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
    * @param startPosition The word start position.
    * @param endPosition The word end position.
    * @return
-   * @throws AuthorOperationException 
    */
   private String getOldWord(AuthorDocumentModel model, Position startPosition,
-      Position endPosition) throws AuthorOperationException {
+      Position endPosition) {
     String oldWord = null;
     try {
       Segment chars = new Segment();

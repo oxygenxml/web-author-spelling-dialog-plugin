@@ -2,6 +2,7 @@ package com.oxygenxml.webapp.plugins.spellcheck;
 
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
+import ro.sync.ecss.extensions.api.access.EditingSessionContext;
 import ro.sync.ecss.extensions.api.webapp.AuthorDocumentModel;
 import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
 import ro.sync.ecss.extensions.api.webapp.WebappRestSafe;
@@ -18,8 +19,8 @@ public class ClearSpellingContextInformationOperation extends AuthorOperationWit
   
   @Override
   public String doOperation(AuthorDocumentModel model, ArgumentsMap args) throws AuthorOperationException {
-    SpellcheckContext spellcheckContext = new SpellcheckContext(model); 
-    spellcheckContext.clear();
+    EditingSessionContext editingContext = model.getAuthorAccess().getEditorAccess().getEditingContext();
+    editingContext.setAttribute(SpellcheckContext.SPELLCHECK_CONTEXT_ATTR_NAME, null);
     return null;
   }
 }

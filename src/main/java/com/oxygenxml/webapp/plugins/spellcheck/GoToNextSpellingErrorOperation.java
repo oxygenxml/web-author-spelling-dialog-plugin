@@ -13,6 +13,7 @@ import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
 import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
 import ro.sync.ecss.extensions.api.SpellSuggestionsInfo;
+import ro.sync.ecss.extensions.api.access.EditingSessionContext;
 import ro.sync.ecss.extensions.api.node.AuthorDocument;
 import ro.sync.ecss.extensions.api.webapp.AuthorDocumentModel;
 import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
@@ -40,7 +41,11 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
       throws AuthorOperationException {
     String result = null;
     try {
-      SpellcheckContext spellcheckContext = new SpellcheckContext(docModel);
+      EditingSessionContext editingContext = docModel.getAuthorAccess().getEditorAccess().getEditingContext();
+      SpellcheckContext spellcheckContext = (SpellcheckContext) editingContext.getAttribute(SpellcheckContext.SPELLCHECK_CONTEXT_ATTR_NAME);
+      if (spellcheckContext == null) {
+        spellcheckContext = new SpellcheckContext();
+      }
 
       IgnoredWords ignoredWords = IgnoredWords.fromUncheckedArgument(
           args.getArgumentValue("ignoredWords"), spellcheckContext);
@@ -52,8 +57,11 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
       if (maybeNextProblem.isPresent()) {
         SpellCheckingProblemInfo nextProblem = maybeNextProblem.get();
         AuthorDocumentController controller = docModel.getAuthorDocumentController();
+        
         // Save informations about the current word
         spellcheckContext.setCurrentWordInfo(SpellcheckWordInfo.from(nextProblem, controller));
+        editingContext.setAttribute(SpellcheckContext.SPELLCHECK_CONTEXT_ATTR_NAME, spellcheckContext);
+        
         // Select the next spelling error.
         docModel.getSelectionModel().setSelection(nextProblem.getStartOffset(), nextProblem.getEndOffset() + 1);
         String[] suggestions = findSuggestions(spellchecker, nextProblem);
@@ -104,7 +112,8 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
   private Optional<SpellCheckingProblemInfo> findNextProblem(AuthorDocumentModel docModel, 
       IgnoredWords ignoredWords, SpellcheckContext spellcheckContext) throws AuthorOperationException {
     WebappSpellchecker spellchecker = docModel.getSpellchecker();
-    AuthorDocument document = docModel.getAuthorDocumentController().getAuthorDocumentNode();
+    AuthorDocumentController controller = docModel.getAuthorDocumentController();
+    AuthorDocument document = controller.getAuthorDocumentNode();
     
     int startOffset = docModel.getSelectionModel().getCaretOffset();
     SpellcheckWordInfo currentWord = spellcheckContext.getCurrentWord();
@@ -118,9 +127,10 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
         document.getEndOffset());
     
     Optional<SpellCheckingProblemInfo> problemInfo = 
-        spellcheckPerformer.runSpellcheck(startOffset, document.getEndOffset());
+        spellcheckPerformer.runSpellcheck(startOffset, document.getEndOffset(), 
+            controller);
     if (!problemInfo.isPresent()) {
-      problemInfo = spellcheckPerformer.runSpellcheck(0, startOffset);
+      problemInfo = spellcheckPerformer.runSpellcheck(0, startOffset, controller);
     }
     return problemInfo;
   }
