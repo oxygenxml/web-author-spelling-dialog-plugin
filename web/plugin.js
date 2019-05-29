@@ -64,26 +64,6 @@
   };
 
   /**
-   * Make sure the selected error is visible - scroll to it and/or expand its fold.
-   * @param {NodeList} nodes List of fake selection nodes.
-   * @private
-   */
- SpellcheckAction.prototype.scrollIntoViewIfNeeded_ = function (nodes) {
-  if (nodes.length) {
-    var selectedNode = nodes[0];
-    var rect = selectedNode.getBoundingClientRect() || {};
-    // If the selected node is hidden, try to toggle the current fold.
-    if (rect.height === 0) {
-      this.editor_.getActionsManager().getActionById('Author/ToggleFold').actionPerformed(function() {
-        selectedNode.scrollIntoView(false);
-      })
-    } else {
-      selectedNode.scrollIntoView(false);
-    }
-  }
- };
-
-  /**
    * Clear selected spellchecking error markers.
    * @private
    */
@@ -422,9 +402,12 @@
 
     this.replaceInput_.focus();
 
+
+    var selection = this.editor_.getSelectionManager().getSelection();
+    this.editor_.scrollSelectionIntoView(selection);
+
     // Consider only non-empty selection placeholder chunks for the dialog overlap check.
     var selectedMarkerChunks = document.querySelectorAll('.selection-rect:not(.caret-placeholder)');
-    this.scrollIntoViewIfNeeded_(selectedMarkerChunks);
     this.makeTransparentIfOverSelected_(selectedMarkerChunks);
   };
 
