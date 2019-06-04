@@ -407,7 +407,7 @@
     this.editor_.scrollSelectionIntoView(selection);
 
     // Consider only non-empty selection placeholder chunks for the dialog overlap check.
-    var selectedMarkerChunks = document.querySelectorAll('.selection-rect:not(.caret-placeholder)');
+    var selectedMarkerChunks = document.querySelectorAll('.oxy-selected');
     this.makeTransparentIfOverSelected_(selectedMarkerChunks);
   };
 
