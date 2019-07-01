@@ -1,5 +1,7 @@
 package com.oxygenxml.webapp.plugins.spellcheck.context;
 
+import java.util.Objects;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
@@ -125,5 +127,10 @@ public class SpellcheckWordInfo {
           wordInfo.getLanguageIsoName().equals(this.getLanguageIsoName());
     } 
     return equals;
+  }
+  
+  @Override
+  public int hashCode() {
+      return Objects.hash(word, languageIsoName, startPosition, endPosition);
   }
 }
