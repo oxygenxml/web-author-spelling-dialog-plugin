@@ -1,7 +1,7 @@
 (function () {
 
   var selectedMarkerClass = 'spelling-selected';
- goog.events.listenOnce(workspace, sync.api.Workspace.EventType.EDITOR_LOADED,
+ goog.events.listen(workspace, sync.api.Workspace.EventType.EDITOR_LOADED,
      function(e) {
    var editor = e.editor;
 
