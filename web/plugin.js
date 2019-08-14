@@ -370,7 +370,11 @@
    *
    * @private
    */
-  SpellcheckAction.prototype.processNextProblemFindResult_ = function(nextProblemDescrString, retry) {
+  SpellcheckAction.prototype.processNextProblemFindResult_ = function(nextProblemDescrString) {
+    // If dialog was closed or disposed, do nothing.
+    if (!this.dialog_ || !this.dialog_.isVisible()) {
+      return;
+    }
     var nextSpellCheckDescr;
     try {
       nextSpellCheckDescr = JSON.parse(nextProblemDescrString);
@@ -478,6 +482,15 @@
    this.findNext();
    callback && callback();
  };
+
+  /**
+   * Clean up when switching editor from DMM.
+   */
+  SpellcheckAction.prototype.dispose = function () {
+    this.dialog_ && this.dialog_.dispose();
+    this.dialogOpenHandler_.dispose();
+    this.eventHandler_.dispose();
+  };
 
 
   function addToMoreToolbar(editor, actionId) {
