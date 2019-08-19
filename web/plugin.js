@@ -208,15 +208,16 @@
         }
       );
 
-      var suggestionsLabel = goog.dom.createDom('label', { className: 'man-sp-label' }, tr(msgs.SUGGESTIONS_) + ':');
+      var labelClass = 'man-sp-label';
+      var suggestionsLabel = goog.dom.createDom('label', { className: labelClass }, tr(msgs.SUGGESTIONS_) + ':');
       suggestionsLabel.setAttribute('for', 'man-sp-suggestions');
       var inputsColumn = createDom('div', 'man-sp-col man-inputs',
         createDom('div', 'man-sp',
           goog.dom.createDom('div', {style: 'position: relative;'},
-            goog.dom.createDom('label', { className: 'man-sp-label', for: 'man-sp-word' }, tr(msgs.MISSPELLED_WORD_) + ':')
+            goog.dom.createDom('label', { className: labelClass, for: 'man-sp-word' }, tr(msgs.MISSPELLED_WORD_) + ':')
           ),
           this.wordInput_,
-          goog.dom.createDom('label', { className: 'man-sp-label' },
+          goog.dom.createDom('label', { className: labelClass },
             tr(msgs.REPLACE_WITH_) + ':',
             this.replaceInput_
           ),
