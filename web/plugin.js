@@ -34,6 +34,9 @@
    this.replaceButton_ = null;
    this.replaceAllButton_ = null;
    this.ignoreButton_ = null;
+
+   // If the editor gets disposed, do not do callbacks of spellcheck action requests.
+   this.disposed_ = false;
  }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
  SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
@@ -117,6 +120,9 @@
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
      }, goog.bind(function(err, resultString) {
+       if (this.disposed_) {
+         return;
+       }
        if (err) {
          this.handleSpellCheckOperationError_(err);
        } else {
@@ -321,6 +327,9 @@
         'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
       },
       goog.bind(function(err, resultString) {
+        if (this.disposed_) {
+          return;
+        }
         if (err) {
           this.handleSpellCheckOperationError_(err);
         } else {
@@ -343,6 +352,9 @@
         'replaceAll' : all,
         'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
       }, goog.bind(function(err, resultString) {
+        if (this.disposed_) {
+          return;
+        }
         if (err) {
           this.handleSpellCheckOperationError_(err);
         } else {
@@ -487,6 +499,7 @@
    * Clean up when switching editor from DMM.
    */
   SpellcheckAction.prototype.dispose = function () {
+    this.disposed_ = true;
     this.dialog_ && this.dialog_.dispose();
     this.dialogOpenHandler_.dispose();
     this.eventHandler_.dispose();
