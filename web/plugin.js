@@ -421,7 +421,7 @@
 
 
     var selection = this.editor_.getSelectionManager().getSelection();
-    this.editor_.scrollSelectionIntoView(selection);
+    this.editor_.getSelectionManager().scrollSelectionIntoView(selection);
 
     // Consider only non-empty selection placeholder chunks for the dialog overlap check.
     var selectedMarkerChunks = document.querySelectorAll('.oxy-selected');
