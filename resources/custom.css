@@ -29,9 +29,6 @@
   min-width: 1px; /* prevent flexbox overflow, also 1px instead of 0 because IE doesn't like it. */
 }
 
-.man-sp-suggestion {
-  padding: 5px 0 5px 10px;
-}
 .man-sp-suggestion:hover:not(.man-sp-selected) {
   background-color: #f2f8fd;
 }
@@ -47,10 +44,6 @@
 .man-sp-button.oxy-button[disabled] {
   color: #ababab;
   background-color: #eeeeee;
-}
-
-#manual-spellcheck .modal-dialog-content{
-  padding-bottom: 30px;
 }
 
 #manual-spellcheck.man-sp-transparence {
