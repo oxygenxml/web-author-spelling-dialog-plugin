@@ -10,7 +10,7 @@
     <key value="ERROR_COMMUNICATING_WITH_SERVER_">
         <comment>Message displayed when the replace or find next problem operations throw errors on the server.</comment>
         <val lang="en_US">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
-        <val lang="de_DE">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+        <val lang="de_DE">Die Operating kann nicht ausgeführt werden, da ein Kommunikationsproblem mit dem Server vorliegt. Bitte versuchen Sie es später erneut.</val>
         <val lang="fr_FR">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
         <val lang="ja_JP">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
         <val lang="nl_NL">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
@@ -18,7 +18,7 @@
     <key value="THE_WORD_HAS_CHANGED_">
         <comment>Message displayed when the replace cannot be performed because the word has changed.</comment>
         <val lang="en_US">The replace operation cannot be performed because the word has changed.</val>
-        <val lang="de_DE">The replace operation cannot be performed because the word has changed.</val>
+        <val lang="de_DE">Die Ersetzen-Operation konnte nicht ausgeführt werden, da sich das Wort geändert hat.</val>
         <val lang="fr_FR">The replace operation cannot be performed because the word has changed.</val>
         <val lang="ja_JP">The replace operation cannot be performed because the word has changed.</val>
         <val lang="nl_NL">The replace operation cannot be performed because the word has changed.</val>
