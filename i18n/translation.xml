@@ -12,16 +12,16 @@
         <val lang="en_US">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
         <val lang="de_DE">Die Operating kann nicht ausgeführt werden, da ein Kommunikationsproblem mit dem Server vorliegt. Bitte versuchen Sie es später erneut.</val>
         <val lang="fr_FR">L'opération ne peut pas être effectuée car il y a eu un problème de communication avec le serveur. Veuillez réessayer plus tard.</val>
-        <val lang="ja_JP">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
-        <val lang="nl_NL">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+        <val lang="ja_JP">サーバーとの通信に問題があるため、操作を実行できません。後で、再試行してください。</val>
+        <val lang="nl_NL">De bewerking kan niet worden uitgevoerd omdat er een probleem is opgetreden in de communicatie met de server. Probeer het later opnieuw.</val>
     </key>
     <key value="THE_WORD_HAS_CHANGED_">
         <comment>Message displayed when the replace cannot be performed because the word has changed.</comment>
         <val lang="en_US">The replace operation cannot be performed because the word has changed.</val>
         <val lang="de_DE">Die Ersetzen-Operation konnte nicht ausgeführt werden, da sich das Wort geändert hat.</val>
         <val lang="fr_FR">L'opération de remplacement ne peut pas être effectuée car le mot a changé.</val>
-        <val lang="ja_JP">The replace operation cannot be performed because the word has changed.</val>
-        <val lang="nl_NL">The replace operation cannot be performed because the word has changed.</val>
+        <val lang="ja_JP">単語が変更されているため、置換操作を実行できません。</val>
+        <val lang="nl_NL">De vervangbewerking kan niet worden uitgevoerd omdat het woord is gewijzigd.</val>
     </key>
     <key value="NO_SPELLING_ERRORS_FOUND_">
         <comment>Message displayed when no spelling errors were found.</comment>
