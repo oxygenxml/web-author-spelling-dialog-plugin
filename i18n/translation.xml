@@ -1,108 +1,120 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<translation>
-    <languageList>
-        <language description="English" lang="en_US"/>
-        <language description="German" lang="de_DE"/>
-        <language description="French" lang="fr_FR"/>
-        <language description="Japanese" lang="ja_JP"/>
-        <language description="Dutch" lang="nl_NL"/>
-    </languageList>
-    <key value="ERROR_COMMUNICATING_WITH_SERVER_">
-        <comment>Message displayed when the replace or find next problem operations throw errors on the server.</comment>
-        <val lang="en_US">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
-        <val lang="de_DE">Die Operating kann nicht ausgeführt werden, da ein Kommunikationsproblem mit dem Server vorliegt. Bitte versuchen Sie es später erneut.</val>
-        <val lang="fr_FR">L'opération ne peut pas être effectuée car il y a eu un problème de communication avec le serveur. Veuillez réessayer plus tard.</val>
-        <val lang="ja_JP">サーバーとの通信に問題があるため、操作を実行できません。後で、再試行してください。</val>
-        <val lang="nl_NL">De bewerking kan niet worden uitgevoerd omdat er een probleem is opgetreden in de communicatie met de server. Probeer het later opnieuw.</val>
-    </key>
-    <key value="THE_WORD_HAS_CHANGED_">
-        <comment>Message displayed when the replace cannot be performed because the word has changed.</comment>
-        <val lang="en_US">The replace operation cannot be performed because the word has changed.</val>
-        <val lang="de_DE">Die Ersetzen-Operation konnte nicht ausgeführt werden, da sich das Wort geändert hat.</val>
-        <val lang="fr_FR">L'opération de remplacement ne peut pas être effectuée car le mot a changé.</val>
-        <val lang="ja_JP">単語が変更されているため、置換操作を実行できません。</val>
-        <val lang="nl_NL">De vervangbewerking kan niet worden uitgevoerd omdat het woord is gewijzigd.</val>
-    </key>
-    <key value="NO_SPELLING_ERRORS_FOUND_">
-        <comment>Message displayed when no spelling errors were found.</comment>
-        <val lang="en_US">No spelling errors were found.</val>
-        <val lang="de_DE">Es wurden keine Rechtschreibfehler gefunden.</val>
-        <val lang="fr_FR">Aucune faute d'orthographe trouvée.</val>
-        <val lang="ja_JP">スペルミスはありませんでした。</val>
-        <val lang="nl_NL">Geen spelfouten gevonden.</val>
-    </key>
-    <key value="MISSPELLED_WORD_">
-        <comment>Spelling highlight</comment>
-        <val lang="en_US">Misspelled word</val>
-        <val lang="de_DE">Falsch geschriebenes Wort</val>
-        <val lang="fr_FR">Mot mal orthographié</val>
-        <val lang="ja_JP">スペリングの誤りのある単語</val>
-        <val lang="nl_NL">Verkeerd gespeld woord</val>
-    </key>
-    <key value="Replace_with">
-        <comment>Find/Replace dialog.</comment>
-        <val lang="en_US">Replace with</val>
-        <val lang="de_DE">Ersetzen durch</val>
-        <val lang="fr_FR">Remplacer par</val>
-        <val lang="ja_JP">置換後</val>
-        <val lang="nl_NL">Vervang door</val>
-    </key>
-    <key value="Suggestions">
-        <comment>Spell checker suggestions</comment>
-        <val lang="en_US">Suggestions</val>
-        <val lang="de_DE">Vorschläge</val>
-        <val lang="fr_FR">Suggestions</val>
-        <val lang="ja_JP">提案</val>
-        <val lang="nl_NL">Suggesties</val>
-    </key>
-    <!-- server-side tags must have the 'destination' attribute set -->
-    <key distribution="webauthor" value="SPELLING_">
-        <comment>Title of spell checking dialog.</comment>
-        <val lang="en_US">Spelling</val>
-        <val lang="de_DE">Rechtschreibung</val>
-        <val lang="fr_FR">Orthographe</val>
-        <val lang="ja_JP">スペル</val>
-        <val lang="nl_NL">Spelling</val>
-    </key>
-    <key distribution="common" value="SPELL_CHECK_ACTION_">
-        <comment>Spell check option caption</comment>
-        <val lang="en_US">Spell Check</val>
-        <val lang="de_DE">Rechtschreibprüfung</val>
-        <val lang="fr_FR">Vérification orthographique</val>
-        <val lang="ja_JP">スペルチェック</val>
-        <val lang="nl_NL">Spellingcontrole</val>
-    </key>
-    <key value="Ignore">
-        <comment/>
-        <val lang="en_US">Ignore</val>
-        <val lang="de_DE">Ignorieren</val>
-        <val lang="fr_FR">Ignorer</val>
-        <val lang="ja_JP">無視</val>
-        <val lang="nl_NL">Negeer</val>
-    </key>
-    <key value="Ignore_All">
-        <comment>Spell dialog. If the same word is to be ignored in all its occurrences.</comment>
-        <val lang="en_US">Ignore All</val>
-        <val lang="de_DE">Alle ignorieren</val>
-        <val lang="fr_FR">Tout ignorer</val>
-        <val lang="ja_JP">すべて無視</val>
-        <val lang="nl_NL">Negeer alles</val>
-    </key>
-    <key value="Replace">
-        <comment/>
-        <val lang="en_US">Replace</val>
-        <val lang="de_DE">Ersetzen</val>
-        <val lang="fr_FR">Remplacer</val>
-        <val lang="ja_JP">置換</val>
-        <val lang="nl_NL">Vervang</val>
-    </key>
-    <key value="Replace_all">
-        <comment>Label of button "Replace all" in the find/replace in files dialog and title of
-            results panel. Only Chinese needed. </comment>
-        <val lang="en_US">Replace All</val>
-        <val lang="de_DE">Alle ersetzen</val>
-        <val lang="fr_FR">Tout remplacer</val>
-        <val lang="ja_JP">すべて置換</val>
-        <val lang="nl_NL">Vervang alles</val>
-    </key>
+<?xml version="1.0" encoding="UTF-8"?><translation>
+  <languageList>
+    <language description="English" lang="en_US"/>
+    <language description="German" lang="de_DE"/>
+    <language description="French" lang="fr_FR"/>
+    <language description="Japanese" lang="ja_JP"/>
+    <language description="Dutch" lang="nl_NL"/>
+    <language description="Chinese" lang="zh_CN"/>
+  </languageList>
+  <key value="ERROR_COMMUNICATING_WITH_SERVER_">
+    <comment>Message displayed when the replace or find next problem operations throw errors on the server.</comment>
+    <val lang="en_US">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+    <val lang="de_DE">Die Operating kann nicht ausgeführt werden, da ein Kommunikationsproblem mit dem Server vorliegt. Bitte versuchen Sie es später erneut.</val>
+    <val lang="fr_FR">L'opération ne peut pas être effectuée car il y a eu un problème de communication avec le serveur. Veuillez réessayer plus tard.</val>
+    <val lang="ja_JP">サーバーとの通信に問題があるため、操作を実行できません。後で、再試行してください。</val>
+    <val lang="nl_NL">De bewerking kan niet worden uitgevoerd omdat er een probleem is opgetreden in de communicatie met de server. Probeer het later opnieuw.</val>
+    <val lang="zh_CN">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+  </key>
+  <key value="THE_WORD_HAS_CHANGED_">
+    <comment>Message displayed when the replace cannot be performed because the word has changed.</comment>
+    <val lang="en_US">The replace operation cannot be performed because the word has changed.</val>
+    <val lang="de_DE">Die Ersetzen-Operation konnte nicht ausgeführt werden, da sich das Wort geändert hat.</val>
+    <val lang="fr_FR">L'opération de remplacement ne peut pas être effectuée car le mot a changé.</val>
+    <val lang="ja_JP">単語が変更されているため、置換操作を実行できません。</val>
+    <val lang="nl_NL">De vervangbewerking kan niet worden uitgevoerd omdat het woord is gewijzigd.</val>
+    <val lang="zh_CN">The replace operation cannot be performed because the word has changed.</val>
+  </key>
+  <key value="NO_SPELLING_ERRORS_FOUND_">
+    <comment>Message displayed when no spelling errors were found.</comment>
+    <val lang="en_US">No spelling errors were found.</val>
+    <val lang="de_DE">Es wurden keine Rechtschreibfehler gefunden.</val>
+    <val lang="fr_FR">Aucune faute d'orthographe trouvée.</val>
+    <val lang="ja_JP">スペルミスはありませんでした。</val>
+    <val lang="nl_NL">Geen spelfouten gevonden.</val>
+    <val lang="zh_CN">No spelling errors were found.</val>
+  </key>
+  <key value="MISSPELLED_WORD_">
+    <comment>Spelling highlight</comment>
+    <val lang="en_US">Misspelled word</val>
+    <val lang="de_DE">Falsch geschriebenes Wort</val>
+    <val lang="fr_FR">Mot mal orthographié</val>
+    <val lang="ja_JP">スペリングの誤りのある単語</val>
+    <val lang="nl_NL">Verkeerd gespeld woord</val>
+    <val lang="zh_CN">Misspelled word</val>
+  </key>
+  <key value="Replace_with">
+    <comment>Find/Replace dialog.</comment>
+    <val lang="en_US">Replace with</val>
+    <val lang="de_DE">Ersetzen durch</val>
+    <val lang="fr_FR">Remplacer par</val>
+    <val lang="ja_JP">置換後</val>
+    <val lang="nl_NL">Vervang door</val>
+    <val lang="zh_CN">Replace with</val>
+  </key>
+  <key value="Suggestions">
+    <comment>Spell checker suggestions</comment>
+    <val lang="en_US">Suggestions</val>
+    <val lang="de_DE">Vorschläge</val>
+    <val lang="fr_FR">Suggestions</val>
+    <val lang="ja_JP">提案</val>
+    <val lang="nl_NL">Suggesties</val>
+    <val lang="zh_CN">Suggestions</val>
+  </key>
+  <!-- server-side tags must have the 'destination' attribute set -->
+  <key distribution="webauthor" value="SPELLING_">
+    <comment>Title of spell checking dialog.</comment>
+    <val lang="en_US">Spelling</val>
+    <val lang="de_DE">Rechtschreibung</val>
+    <val lang="fr_FR">Orthographe</val>
+    <val lang="ja_JP">スペル</val>
+    <val lang="nl_NL">Spelling</val>
+    <val lang="zh_CN">Spelling</val>
+  </key>
+  <key distribution="common" value="SPELL_CHECK_ACTION_">
+    <comment>Spell check option caption</comment>
+    <val lang="en_US">Spell Check</val>
+    <val lang="de_DE">Rechtschreibprüfung</val>
+    <val lang="fr_FR">Vérification orthographique</val>
+    <val lang="ja_JP">スペルチェック</val>
+    <val lang="nl_NL">Spellingcontrole</val>
+    <val lang="zh_CN">Spell Check</val>
+  </key>
+  <key value="Ignore">
+    <comment/>
+    <val lang="en_US">Ignore</val>
+    <val lang="de_DE">Ignorieren</val>
+    <val lang="fr_FR">Ignorer</val>
+    <val lang="ja_JP">無視</val>
+    <val lang="nl_NL">Negeer</val>
+    <val lang="zh_CN">Ignore</val>
+  </key>
+  <key value="Ignore_All">
+    <comment>Spell dialog. If the same word is to be ignored in all its occurrences.</comment>
+    <val lang="en_US">Ignore All</val>
+    <val lang="de_DE">Alle ignorieren</val>
+    <val lang="fr_FR">Tout ignorer</val>
+    <val lang="ja_JP">すべて無視</val>
+    <val lang="nl_NL">Negeer alles</val>
+    <val lang="zh_CN">Ignore All</val>
+  </key>
+  <key value="Replace">
+    <comment/>
+    <val lang="en_US">Replace</val>
+    <val lang="de_DE">Ersetzen</val>
+    <val lang="fr_FR">Remplacer</val>
+    <val lang="ja_JP">置換</val>
+    <val lang="nl_NL">Vervang</val>
+    <val lang="zh_CN">Replace</val>
+  </key>
+  <key value="Replace_all">
+    <comment>Label of button "Replace all" in the find/replace in files dialog and title of
+      results panel. Only Chinese needed. </comment>
+    <val lang="en_US">Replace All</val>
+    <val lang="de_DE">Alle ersetzen</val>
+    <val lang="fr_FR">Tout remplacer</val>
+    <val lang="ja_JP">すべて置換</val>
+    <val lang="nl_NL">Vervang alles</val>
+    <val lang="zh_CN">Replace All</val>
+  </key>
 </translation>
