@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><translation>
+<?xml version="1.0" encoding="UTF-8"?>
+<translation>
   <languageList>
     <language description="English" lang="en_US"/>
     <language description="German" lang="de_DE"/>
@@ -14,7 +15,7 @@
     <val lang="fr_FR">L'opération ne peut pas être effectuée car il y a eu un problème de communication avec le serveur. Veuillez réessayer plus tard.</val>
     <val lang="ja_JP">サーバーとの通信に問題があるため、操作を実行できません。後で、再試行してください。</val>
     <val lang="nl_NL">De bewerking kan niet worden uitgevoerd omdat er een probleem is opgetreden in de communicatie met de server. Probeer het later opnieuw.</val>
-    <val lang="zh_CN">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
+    <val lang="zh_CN">无法执行该操作，因为与服务器通信时出现问题。请稍后再试。</val>
   </key>
   <key value="THE_WORD_HAS_CHANGED_">
     <comment>Message displayed when the replace cannot be performed because the word has changed.</comment>
@@ -23,7 +24,7 @@
     <val lang="fr_FR">L'opération de remplacement ne peut pas être effectuée car le mot a changé.</val>
     <val lang="ja_JP">単語が変更されているため、置換操作を実行できません。</val>
     <val lang="nl_NL">De vervangbewerking kan niet worden uitgevoerd omdat het woord is gewijzigd.</val>
-    <val lang="zh_CN">The replace operation cannot be performed because the word has changed.</val>
+    <val lang="zh_CN">无法执行替换操作，因为单词已更改。</val>
   </key>
   <key value="NO_SPELLING_ERRORS_FOUND_">
     <comment>Message displayed when no spelling errors were found.</comment>
@@ -32,7 +33,7 @@
     <val lang="fr_FR">Aucune faute d'orthographe trouvée.</val>
     <val lang="ja_JP">スペルミスはありませんでした。</val>
     <val lang="nl_NL">Geen spelfouten gevonden.</val>
-    <val lang="zh_CN">No spelling errors were found.</val>
+    <val lang="zh_CN">未发现拼写错误。</val>
   </key>
   <key value="MISSPELLED_WORD_">
     <comment>Spelling highlight</comment>
@@ -41,7 +42,7 @@
     <val lang="fr_FR">Mot mal orthographié</val>
     <val lang="ja_JP">スペリングの誤りのある単語</val>
     <val lang="nl_NL">Verkeerd gespeld woord</val>
-    <val lang="zh_CN">Misspelled word</val>
+    <val lang="zh_CN">拼错的单词</val>
   </key>
   <key value="Replace_with">
     <comment>Find/Replace dialog.</comment>
@@ -50,7 +51,7 @@
     <val lang="fr_FR">Remplacer par</val>
     <val lang="ja_JP">置換後</val>
     <val lang="nl_NL">Vervang door</val>
-    <val lang="zh_CN">Replace with</val>
+    <val lang="zh_CN">替换为</val>
   </key>
   <key value="Suggestions">
     <comment>Spell checker suggestions</comment>
@@ -59,7 +60,7 @@
     <val lang="fr_FR">Suggestions</val>
     <val lang="ja_JP">提案</val>
     <val lang="nl_NL">Suggesties</val>
-    <val lang="zh_CN">Suggestions</val>
+    <val lang="zh_CN">建议</val>
   </key>
   <!-- server-side tags must have the 'destination' attribute set -->
   <key distribution="webauthor" value="SPELLING_">
@@ -69,7 +70,7 @@
     <val lang="fr_FR">Orthographe</val>
     <val lang="ja_JP">スペル</val>
     <val lang="nl_NL">Spelling</val>
-    <val lang="zh_CN">Spelling</val>
+    <val lang="zh_CN">拼写</val>
   </key>
   <key distribution="common" value="SPELL_CHECK_ACTION_">
     <comment>Spell check option caption</comment>
@@ -78,7 +79,7 @@
     <val lang="fr_FR">Vérification orthographique</val>
     <val lang="ja_JP">スペルチェック</val>
     <val lang="nl_NL">Spellingcontrole</val>
-    <val lang="zh_CN">Spell Check</val>
+    <val lang="zh_CN">拼写检查</val>
   </key>
   <key value="Ignore">
     <comment/>
@@ -87,7 +88,7 @@
     <val lang="fr_FR">Ignorer</val>
     <val lang="ja_JP">無視</val>
     <val lang="nl_NL">Negeer</val>
-    <val lang="zh_CN">Ignore</val>
+    <val lang="zh_CN">忽略</val>
   </key>
   <key value="Ignore_All">
     <comment>Spell dialog. If the same word is to be ignored in all its occurrences.</comment>
@@ -96,7 +97,7 @@
     <val lang="fr_FR">Tout ignorer</val>
     <val lang="ja_JP">すべて無視</val>
     <val lang="nl_NL">Negeer alles</val>
-    <val lang="zh_CN">Ignore All</val>
+    <val lang="zh_CN">全部忽略</val>
   </key>
   <key value="Replace">
     <comment/>
@@ -105,7 +106,7 @@
     <val lang="fr_FR">Remplacer</val>
     <val lang="ja_JP">置換</val>
     <val lang="nl_NL">Vervang</val>
-    <val lang="zh_CN">Replace</val>
+    <val lang="zh_CN">替换</val>
   </key>
   <key value="Replace_all">
     <comment>Label of button "Replace all" in the find/replace in files dialog and title of
@@ -115,6 +116,6 @@
     <val lang="fr_FR">Tout remplacer</val>
     <val lang="ja_JP">すべて置換</val>
     <val lang="nl_NL">Vervang alles</val>
-    <val lang="zh_CN">Replace All</val>
+    <val lang="zh_CN">全部替换</val>
   </key>
 </translation>
