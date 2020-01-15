@@ -81,7 +81,7 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
    * @param model The Author document model.
    * @param startPosition The word start position.
    * @param endPosition The word end position.
-   * @return
+   * @return The old word between the given positions.
    */
   private String getOldWord(AuthorDocumentModel model, Position startPosition,
       Position endPosition) {

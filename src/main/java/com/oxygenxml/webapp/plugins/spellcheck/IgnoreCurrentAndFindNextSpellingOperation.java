@@ -35,7 +35,7 @@ public class IgnoreCurrentAndFindNextSpellingOperation extends AuthorOperationWi
    * Add current word to ignored words.
    * 
    * @param model Author document model.
-   * @param wordInfo The word info.
+   * 
    * @return The ignored word.
    */
   public SpellcheckWordInfo ignoreCurrentWord(AuthorDocumentModel model) {

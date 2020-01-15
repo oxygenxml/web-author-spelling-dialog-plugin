@@ -64,8 +64,6 @@ public class SpellcheckContext {
   
   /**
    * Add current word to ignored words.
-   * 
-   * @param wordInfo The word info.
    */
   public void ignoreCurrentWord() {
     SpellcheckWordInfo currentWord = getCurrentWord();

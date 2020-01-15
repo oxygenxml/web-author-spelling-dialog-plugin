@@ -79,8 +79,8 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    * 
    * @param nextProblem Next problem
    * @param suggestions Suggestion
-   * @return
-   * @throws AuthorOperationException
+   * @return The find operation result as JSON string.
+   * @throws AuthorOperationException If the serialization fails.
    */
   private String getFindResult(SpellCheckingProblemInfo nextProblem, String[] suggestions) throws AuthorOperationException {
     String result = null;
@@ -107,7 +107,7 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
    * @param spellcheckContext Spellcheck context.
    * 
    * @return Info about the next spell-checking problem, if any.
-   * @throws AuthorOperationException
+   * @throws AuthorOperationException If the spell-checking fails.
    */
   private Optional<SpellCheckingProblemInfo> findNextProblem(AuthorDocumentModel docModel, 
       IgnoredWords ignoredWords, SpellcheckContext spellcheckContext) throws AuthorOperationException {

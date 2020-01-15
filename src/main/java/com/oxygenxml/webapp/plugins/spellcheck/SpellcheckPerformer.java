@@ -66,7 +66,7 @@ public class SpellcheckPerformer {
    * 
    * @return The first problem found, or null if everything is ok.
    * 
-   * @throws AuthorOperationException
+   * @throws AuthorOperationException If the spellcheck fails.
    */
   public Optional<SpellCheckingProblemInfo> runSpellcheck(
       int startOffset, int endOffset, AuthorDocumentController controller) throws AuthorOperationException {
@@ -97,7 +97,7 @@ public class SpellcheckPerformer {
    * 
    * @return The first problem found or null if no problems were found.
    * 
-   * @throws AuthorOperationException
+   * @throws AuthorOperationException If the spellcheck fails.
    */
   private Optional<SpellCheckingProblemInfo> runSpellcheckSingleInterval(
       int start, int end, AuthorDocumentController controller) throws AuthorOperationException {
