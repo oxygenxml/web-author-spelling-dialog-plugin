@@ -4,7 +4,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
@@ -27,7 +28,7 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
   /**
    * Logger.
    */
-  private Logger logger = Logger.getLogger(ReplaceAndFindNextSpellingOperation.class);
+  private Logger logger = LogManager.getLogger(ReplaceAndFindNextSpellingOperation.class);
   
   /**
    * Attribute name for the "replace all" option.

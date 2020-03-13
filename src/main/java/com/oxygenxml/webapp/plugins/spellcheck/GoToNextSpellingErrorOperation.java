@@ -5,7 +5,8 @@ import java.util.Optional;
 
 import javax.swing.text.BadLocationException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import ro.sync.ecss.extensions.api.ArgumentsMap;
@@ -34,7 +35,7 @@ public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
   /**
    * Logger.
    */
-  Logger logger = Logger.getLogger(GoToNextSpellingErrorOperation.class);
+  Logger logger = LogManager.getLogger(GoToNextSpellingErrorOperation.class);
 
   @Override
   public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args) 

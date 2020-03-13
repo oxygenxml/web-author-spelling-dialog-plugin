@@ -7,7 +7,8 @@ import java.util.Optional;
 
 import javax.swing.text.BadLocationException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
@@ -26,7 +27,7 @@ public class SpellcheckPerformer {
   /**
    * Logger.
    */
-  Logger logger = Logger.getLogger(SpellcheckPerformer.class);
+  Logger logger = LogManager.getLogger(SpellcheckPerformer.class);
   
   /**
    * Spellchecker.
