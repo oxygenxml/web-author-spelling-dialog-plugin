@@ -57,7 +57,7 @@
     <comment>Spell checker suggestions</comment>
     <val lang="en_US">Suggestions</val>
     <val lang="de_DE">Vorschläge</val>
-    <val lang="fr_FR">Suggestions</val>
+    <val lang="fr_FR" skipTranslation="true">Suggestions</val>
     <val lang="ja_JP">提案</val>
     <val lang="nl_NL">Suggesties</val>
     <val lang="zh_CN">建议</val>
