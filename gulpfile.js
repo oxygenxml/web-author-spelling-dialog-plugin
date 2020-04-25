@@ -8,17 +8,18 @@ var Synci18n = require("sync-i18n");
 
 var fs = require('fs');
 
-gulp.task('i18n', function () {
+gulp.task('i18n', function (done) {
   Synci18n({ destinationFile: './web/0_Translations.js' }).generateTranslations();
+  done();
 });
 
-gulp.task('prepare-package', ['i18n'], function() {
+gulp.task('prepare-package', gulp.series('i18n', function() {
   return gulp.src("web/*.js")
     .pipe(sort())
     .pipe(concat('plugin.js'))
     .pipe(iife({useStrict: false, prependSemicolon: true}))
     .pipe(uglify())
     .pipe(gulp.dest('target/'));
-});
+}));
 
-gulp.task('default', ['prepare-package']);
+gulp.task('default', gulp.series('prepare-package'));
