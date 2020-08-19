@@ -44,6 +44,9 @@
       <source>plugin.xml</source>
       <filtered>true</filtered>
     </file>
+    <file>
+      <source>LICENSE</source>
+    </file>
   </files>
 
 </assembly>
