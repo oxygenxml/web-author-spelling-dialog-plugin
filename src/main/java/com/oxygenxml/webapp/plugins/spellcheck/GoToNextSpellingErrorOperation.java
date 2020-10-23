@@ -7,7 +7,11 @@ import javax.swing.text.BadLocationException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckWordInfo;
 
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
@@ -20,10 +24,6 @@ import ro.sync.ecss.extensions.api.webapp.AuthorDocumentModel;
 import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
 import ro.sync.ecss.extensions.api.webapp.WebappRestSafe;
 import ro.sync.ecss.extensions.api.webapp.WebappSpellchecker;
-
-import com.google.common.collect.ImmutableMap;
-import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
-import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckWordInfo;
 
 /**
  * Operation that goes to the next spelling error.
