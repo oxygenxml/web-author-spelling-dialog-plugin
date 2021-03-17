@@ -18,7 +18,11 @@
   * The action that shows a popup and then inserts the text in the pop-up.
   */
  function SpellcheckAction (editor) {
-   sync.actions.AbstractAction.call(this, 'F7');
+   sync.actions.Action.call(this, {
+     keyStrokeStr: 'F7',
+     description: tr(msgs.SPELL_CHECK_ACTION_),
+     displayName: tr(msgs.SPELL_CHECK_ACTION_),
+   });
    this.editor_ = editor;
    this.dialog_ = null;
 
@@ -39,7 +43,7 @@
    this.disposed_ = false;
  }
  // shortcut is Meta+L on Mac and Ctrl+L on other platforms.
- SpellcheckAction.prototype = Object.create(sync.actions.AbstractAction.prototype);
+ SpellcheckAction.prototype = Object.create(sync.actions.Action.prototype);
  SpellcheckAction.prototype.constructor = SpellcheckAction;
 
  SpellcheckAction.prototype.getLargeIcon = function () {
@@ -48,14 +52,6 @@
     icon = 'Blue_SpellCheck24.png';
    }
    return sync.util.computeHdpiIcon('../plugin-resources/man-sp/' + icon);
- };
-
-  SpellcheckAction.prototype.getDescription = function() {
-    return tr(msgs.SPELL_CHECK_ACTION_);
-  };
-
- SpellcheckAction.prototype.getDisplayName = function() {
-   return tr(msgs.SPELL_CHECK_ACTION_);
  };
 
  SpellcheckAction.prototype.showInfo_ = function (message) {
