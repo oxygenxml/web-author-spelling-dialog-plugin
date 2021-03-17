@@ -178,77 +178,102 @@
    this.replaceInput_.value = this.suggestionsBox_.value;
  };
 
+  /**
+   * Create the manual spellcheck dialog.
+   * @return {sync.api.Dialog} The dialog.
+   * @private
+   */
+ SpellcheckAction.prototype.createDialog_ = function () {
+   var dialog = workspace.createDialog('manual-spellcheck', true);
+   dialog.setPreferredSize(370, 340);
+   dialog.setHasTitleCloseButton(true);
+   dialog.setBackgroundElementOpacity(0);
+   dialog.setTitle(tr(msgs.SPELLING_));
+   dialog.setResizable(true);
+   dialog.setButtonConfiguration([]);
+   return dialog;
+ };
+
+  /**
+   * Create a button element for the dialog.
+   * @param {string} name The button name.
+   * @param {string} caption The text of the button.
+   * @return {Element} The button element.
+   * @private
+   */
+  SpellcheckAction.prototype.createButton_ = function (name, caption) {
+    var button = goog.dom.createDom('button', { className: 'man-sp-button oxy-button oxy-small-button' }, caption);
+    goog.dom.dataset.set(button, 'spButton', name);
+    return button;
+  };
+
+  /**
+   * Add the contents of the dialog.
+   * @private
+   */
+ SpellcheckAction.prototype.createDialogContents_ = function () {
+   var createDom = goog.dom.createDom;
+   this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text' });
+   this.wordInput_.setAttribute('readonly', 'true');
+   this.replaceInput_ = createDom('input', { id: 'man-sp-replace-with', className: 'man-sp-input', type: 'text' });
+   this.suggestionsBox_ = createDom('select', { id: 'man-sp-suggestions', size: 6 });
+
+   var labelClass = 'man-sp-label';
+   var suggestionsLabel = goog.dom.createDom('label', { className: labelClass }, tr(msgs.SUGGESTIONS_) + ':');
+   suggestionsLabel.setAttribute('for', 'man-sp-suggestions');
+   var inputsColumn = createDom('div', 'man-sp-col man-inputs',
+     createDom('div', 'man-sp',
+       goog.dom.createDom('div', {style: 'position: relative;'},
+         goog.dom.createDom('label', { className: labelClass, for: 'man-sp-word' }, tr(msgs.MISSPELLED_WORD_) + ':')
+       ),
+       this.wordInput_,
+       goog.dom.createDom('label', { className: labelClass },
+         tr(msgs.REPLACE_WITH_) + ':',
+         this.replaceInput_
+       ),
+       suggestionsLabel,
+       this.suggestionsBox_
+     )
+   );
+
+   this.ignoreButton_ = this.createButton_('ignore', tr(msgs.IGNORE_));
+   var ignoreAllButton = this.createButton_('ignore_all', tr(msgs.IGNORE_ALL_));
+   this.replaceButton_ = this.createButton_('replace', tr(msgs.REPLACE_));
+   this.replaceAllButton_ = this.createButton_('replace_all', tr(msgs.REPLACE_ALL_));
+
+
+   var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
+     this.replaceButton_,
+     this.replaceAllButton_,
+     this.ignoreButton_,
+     ignoreAllButton
+   );
+
+   var dialogElement = this.dialog_.getElement();
+   dialogElement.setAttribute('id', 'manual-spellcheck-container');
+
+   goog.dom.append(dialogElement,
+     inputsColumn,
+     buttonsColumn
+   );
+
+   goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(this.clickOnButtons_, this));
+ };
+
+  /**
+   * Show the dialog.
+   * @private
+   */
   SpellcheckAction.prototype.showDialog_ = function () {
-    var dialog = this.dialog_;
-    if (!dialog) {
-      dialog = workspace.createDialog('manual-spellcheck', true);
-      dialog.setPreferredSize(370, 340);
-      dialog.setHasTitleCloseButton(true);
-      dialog.setBackgroundElementOpacity(0);
-      dialog.setTitle(tr(msgs.SPELLING_));
-      dialog.setResizable(true);
-      dialog.setButtonConfiguration([]);
+    if (!this.dialog_) {
+      this.dialog_ = this.createDialog_();
       var toolbarButton = document.querySelector('[name="' + spellingDialogActionId + '"]');
       if (toolbarButton) {
         var position = goog.style.getPageOffset(toolbarButton);
-        dialog.setPosition(position.x , (position.y + toolbarButton.clientHeight));
+        this.dialog_.setPosition(position.x , (position.y + toolbarButton.clientHeight));
       }
 
-      var createDom = goog.dom.createDom;
-      this.wordInput_ = createDom('input', { id: 'man-sp-word', className: 'man-sp-input', type: 'text' });
-      this.wordInput_.setAttribute('readonly', 'true');
-      this.replaceInput_ = createDom('input', { id: 'man-sp-replace-with', className: 'man-sp-input', type: 'text' });
-      this.suggestionsBox_ = createDom('select', {
-          id: 'man-sp-suggestions',
-          size: 6
-        }
-      );
-
-      var labelClass = 'man-sp-label';
-      var suggestionsLabel = goog.dom.createDom('label', { className: labelClass }, tr(msgs.SUGGESTIONS_) + ':');
-      suggestionsLabel.setAttribute('for', 'man-sp-suggestions');
-      var inputsColumn = createDom('div', 'man-sp-col man-inputs',
-        createDom('div', 'man-sp',
-          goog.dom.createDom('div', {style: 'position: relative;'},
-            goog.dom.createDom('label', { className: labelClass, for: 'man-sp-word' }, tr(msgs.MISSPELLED_WORD_) + ':')
-          ),
-          this.wordInput_,
-          goog.dom.createDom('label', { className: labelClass },
-            tr(msgs.REPLACE_WITH_) + ':',
-            this.replaceInput_
-          ),
-          suggestionsLabel,
-          this.suggestionsBox_
-        )
-      );
-
-      var createButton = function (name, caption) {
-        var button = goog.dom.createDom('button', { className: 'man-sp-button oxy-button oxy-small-button' }, caption);
-        goog.dom.dataset.set(button, 'spButton', name);
-        return button;
-      };
-      this.ignoreButton_ = createButton('ignore', tr(msgs.IGNORE_));
-      var ignoreAllButton = createButton('ignore_all', tr(msgs.IGNORE_ALL_));
-      this.replaceButton_ = createButton('replace', tr(msgs.REPLACE_));
-      this.replaceAllButton_ = createButton('replace_all', tr(msgs.REPLACE_ALL_));
-
-
-      var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
-        this.replaceButton_,
-        this.replaceAllButton_,
-        this.ignoreButton_,
-        ignoreAllButton
-      );
-
-      var dialogElement = dialog.getElement();
-      dialogElement.setAttribute('id', 'manual-spellcheck-container');
-
-
-      goog.dom.append(dialogElement,
-        inputsColumn,
-        buttonsColumn
-      );
-
+      this.createDialogContents_();
       var suggestionsBox = this.suggestionsBox_;
       goog.events.listen(suggestionsBox, goog.events.EventType.CHANGE,
         goog.bind(this.suggestionSelected_, this));
@@ -263,18 +288,15 @@
         }
       }, this));
 
-      goog.events.listen(buttonsColumn, goog.events.EventType.CLICK, goog.bind(this.clickOnButtons_, this));
-
       this.eventHandler_
-        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.SHOW, goog.bind(this.afterShow_, this))
-        .listen(dialog.getEventTarget(), goog.ui.PopupBase.EventType.BEFORE_HIDE, goog.bind(this.beforeHide_, this));
-      this.dialog_ = dialog;
+        .listen(this.dialog_.getEventTarget(), goog.ui.PopupBase.EventType.SHOW, goog.bind(this.afterShow_, this))
+        .listen(this.dialog_.getEventTarget(), goog.ui.PopupBase.EventType.BEFORE_HIDE, goog.bind(this.beforeHide_, this));
     }
 
     this.setSpellCheckButtonsEnabled_(false);
     this.wordInput_.value = '';
     this.clearSpellCheckSuggestions_();
-    dialog.show();
+    this.dialog_.show();
   };
 
   /**
