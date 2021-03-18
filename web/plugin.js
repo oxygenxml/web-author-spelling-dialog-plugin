@@ -1,6 +1,10 @@
-(function () {
+/**
+ * The id of the spelling dialog action.
+ * @type {string} The action id.
+ */
+var spellingDialogActionId = 'Author/SpellingDialog';
 
-  var selectedMarkerClass = 'spelling-selected';
+ var selectedMarkerClass = 'spelling-selected';
  goog.events.listen(workspace, sync.api.Workspace.EventType.EDITOR_LOADED,
      function(e) {
    var editor = e.editor;
@@ -21,7 +25,7 @@
    sync.actions.Action.call(this, {
      keyStrokeStr: 'F7',
      description: tr(msgs.SPELL_CHECK_ACTION_),
-     displayName: tr(msgs.SPELL_CHECK_ACTION_),
+     displayName: tr(msgs.SPELL_CHECK_ACTION_)
    });
    this.editor_ = editor;
    this.dialog_ = null;
@@ -547,4 +551,3 @@
       }
     });
   }
-})();
