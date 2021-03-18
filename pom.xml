@@ -152,7 +152,7 @@
                   <type>war</type>
                   <outputDirectory>${project.build.directory}/war/</outputDirectory>
                   <includes>app/**/*.js</includes>
-                  <excludes>app/text-page-*.js,app/admin-custom-*.js</excludes><!-- TODO -->
+                  <excludes>app/text-page-*.js,app/admin-custom-*.js</excludes>
                   <overWrite>true</overWrite>
                 </artifactItem>
               </artifactItems>
