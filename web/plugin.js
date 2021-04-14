@@ -4,7 +4,6 @@
  */
 var spellingDialogActionId = 'Author/SpellingDialog';
 
- var selectedMarkerClass = 'spelling-selected';
  goog.events.listen(workspace, sync.api.Workspace.EventType.EDITOR_LOADED,
      function(e) {
    var editor = e.editor;
@@ -28,6 +27,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
      displayName: tr(msgs.SPELL_CHECK_ACTION_)
    });
    this.editor_ = editor;
+   this.operationsInvoker_ = editor.getEditingSupport().getOperationsInvoker();
    this.dialog_ = null;
 
    this.wordInput_ = null;
@@ -60,21 +60,6 @@ var spellingDialogActionId = 'Author/SpellingDialog';
 
  SpellcheckAction.prototype.showInfo_ = function (message) {
    this.editor_.problemReporter && this.editor_.problemReporter.showInfo(message);
- };
-
-  SpellcheckAction.prototype.showError_ = function (message) {
-    this.editor_.problemReporter && this.editor_.problemReporter.showError(message);
-  };
-
-  /**
-   * Clear selected spellchecking error markers.
-   * @private
-   */
- SpellcheckAction.prototype.clearSelectedMarkers_ = function () {
-   var fakeSpellcheckingSelections = document.querySelectorAll('.' + selectedMarkerClass);
-   for (var j = 0; j < fakeSpellcheckingSelections.length; j++) {
-     goog.dom.classlist.remove(fakeSpellcheckingSelections[j], selectedMarkerClass);
-   }
  };
 
   /**
@@ -115,20 +100,12 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    * Find the next error.
    */
  SpellcheckAction.prototype.findNext = function () {
-   var actionsManager = this.editor_.getActionsManager();
-   actionsManager.invokeOperation(
+   return this.operationsInvoker_.invoke(
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
-       'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
-     }, goog.bind(function(err, resultString) {
-       if (this.disposed_) {
-         return;
-       }
-       if (err) {
-         this.handleSpellCheckOperationError_(err);
-       } else {
-         this.processNextProblemFindResult_(resultString);
-       }
-    }, this));
+        params: {ignoredWords: this.editor_.getSpellChecker().getIgnoredWords()}
+     })
+       .then(resultString => this.processNextProblemFindResult_(resultString))
+       .catch(err => this.handleSpellCheckOperationError_(err));
  };
 
   /**
@@ -137,9 +114,11 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    * @param {object} err The error.
    */
   SpellcheckAction.prototype.handleSpellCheckOperationError_ = function(err) {
-    console.error(err);
-    var errorMessage = tr(msgs.ERROR_COMMUNICATING_WITH_SERVER_);
-    this.editor_.problemReporter && this.editor_.problemReporter.showError(errorMessage);
+    if (!this.disposed_) {
+      console.error(err);
+      var errorMessage = tr(msgs.ERROR_COMMUNICATING_WITH_SERVER_);
+      this.editor_.problemReporter && this.editor_.problemReporter.showError(errorMessage, true);
+    }
   };
 
   /**
@@ -309,12 +288,15 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    * @private
    */
   SpellcheckAction.prototype.clearSpellcheckContextInformation_ = function() {
-    this.editor_.getActionsManager().invokeOperation('com.oxygenxml.webapp.plugins.spellcheck.ClearSpellingContextInformationOperation', {});
+    // noinspection JSIgnoredPromiseFromCall
+    this.operationsInvoker_.invoke(
+        'com.oxygenxml.webapp.plugins.spellcheck.ClearSpellingContextInformationOperation',
+        {params: {}});
   };
 
   /**
    * Handle click in the buttons column.
-   * @param {goog.events.EventType.CLICK} e The click event.
+   * @param {goog.events.Event} e The click event.
    * @private
    */
   SpellcheckAction.prototype.clickOnButtons_ = function (e) {
@@ -345,58 +327,85 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    * @private
    */
   SpellcheckAction.prototype.ignore_ = function () {
-    this.editor_.getActionsManager().invokeOperation(
+    return this.operationsInvoker_.invoke(
       'com.oxygenxml.webapp.plugins.spellcheck.IgnoreCurrentAndFindNextSpellingOperation', {
-        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
-      },
-      goog.bind(function(err, resultString) {
-        if (this.disposed_) {
-          return;
-        }
-        if (err) {
-          this.handleSpellCheckOperationError_(err);
-        } else {
-          this.processNextProblemFindResult_(resultString, true);
-        }
-      }, this));
+        params: {ignoredWords: this.editor_.getSpellChecker().getIgnoredWords()}
+      })
+        .then(resultString => this.processNextProblemFindResult_(resultString))
+        .catch(err => this.handleSpellCheckOperationError_(err));
   };
 
   /**
    * Replace an error with the selected value.
    *
-   * @param {boolean} all True to replace all occurrences.
+   * @param {boolean=} all True to replace all occurrences.
    *
    * @private
    */
   SpellcheckAction.prototype.replace_ = function (all) {
-    this.editor_.getActionsManager().invokeOperation(
+    return this.operationsInvoker_.invoke(
       'com.oxygenxml.webapp.plugins.spellcheck.ReplaceAndFindNextSpellingOperation', {
-        'newWord': this.replaceInput_.value,
-        'replaceAll' : all,
-        'ignoredWords': this.editor_.getSpellChecker().getIgnoredWords()
-      }, goog.bind(function(err, resultString) {
-        if (this.disposed_) {
-          return;
-        }
-        if (err) {
-          this.handleSpellCheckOperationError_(err);
-        } else {
+          params: {
+            newWord: this.replaceInput_.value,
+            replaceAll : !!all,
+            ignoredWords: this.editor_.getSpellChecker().getIgnoredWords()
+          }
+      })
+        .then(resultString => {
+          /** @type {{wordChanged: boolean=}} */
           var result = resultString ? JSON.parse(resultString) : {};
           if (result.wordChanged) {
-            var dialog = workspace.createDialog();
-            dialog.setTitle(tr(msgs.SPELL_CHECK_ACTION_));
-            goog.dom.appendChild(dialog.getElement(),
-              goog.dom.createDom('div', '', tr(msgs.THE_WORD_HAS_CHANGED_)));
-            dialog.setButtonConfiguration(sync.api.Dialog.ButtonConfiguration.OK);
-            dialog.onSelect(goog.bind(this.findNext, this));
-            dialog.getElement().setAttribute('id', 'word-changed-warn-container');
-            dialog.show();
+            return this.showChangedWordWarning_();
           } else {
-            this.processNextProblemFindResult_(resultString, true);
+            this.processNextProblemFindResult_(resultString);
           }
-        }
-      }, this));
+        })
+        .catch(err => this.handleSpellCheckOperationError_(err));
   };
+
+  /**
+   * Show a warning that a word was changed and thus, the replace could not be performed.
+   * @private
+   */
+  SpellcheckAction.prototype.showChangedWordWarning_ = function () {
+    return Promise.resolve()
+        .then(() => this.createChangedWordWarningDialog_())
+        .then(dialog => this.waitForDialogSelect_(dialog))
+        .then(() => this.findNext());
+  };
+
+  /**
+   * @return {sync.api.Dialog} The warning dialog.
+   *
+   * @private
+   */
+  SpellcheckAction.prototype.createChangedWordWarningDialog_ = function () {
+    var dialog = workspace.createDialog();
+    dialog.setTitle(tr(msgs.SPELL_CHECK_ACTION_));
+    goog.dom.appendChild(dialog.getElement(),
+        goog.dom.createDom('div', '', tr(msgs.THE_WORD_HAS_CHANGED_)));
+    dialog.setButtonConfiguration(sync.api.Dialog.ButtonConfiguration.OK);
+    dialog.getElement().setAttribute('id', 'word-changed-warn-container');
+    return dialog;
+  };
+
+  /**
+   * Show the dialog and waits for user input.
+   *
+   * @param {sync.api.Dialog} dialog The dialog to wait on.
+   * @return {Promise} a promise that resolves when the user presses a button in the dialog.
+   *
+   * @private
+   */
+    SpellcheckAction.prototype.waitForDialogSelect_ = function (dialog) {
+      return new Promise(function(resolve) {
+        dialog.show();
+        dialog.onSelect(() => {
+          resolve();
+          dialog.dispose();
+        });
+      })
+    };
 
   /**
    * Process the result of finding next spellcheck problem.
@@ -407,9 +416,12 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    */
   SpellcheckAction.prototype.processNextProblemFindResult_ = function(nextProblemDescrString) {
     // If dialog was closed or disposed, do nothing.
-    if (!this.dialog_ || !this.dialog_.isVisible()) {
+    if (!this.dialog_ || !this.dialog_.isVisible() || this.disposed_) {
       return;
     }
+    /**
+     * @type {{language: string, word: string, suggestions: [string]}}
+     */
     var nextSpellCheckDescr;
     try {
       nextSpellCheckDescr = JSON.parse(nextProblemDescrString);
@@ -429,7 +441,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
       // If selection is now in readonly content, disable replace buttons.
       this.setSpellCheckButtonsEnabled_(true);
       var editorReadOnlyStatus = this.editor_.getReadOnlyStatus().isReadOnly();
-      var selectionInReadOnlyContent = sync.select.evalSelectionFunction(sync.util.isInReadOnlyContent);
+      var selectionInReadOnlyContent = this.editor_.getSelectionManager().evalSelectionFunction(sync.util.isInReadOnlyContent);
       if (editorReadOnlyStatus || selectionInReadOnlyContent) {
         this.replaceButton_.disabled = true;
         this.replaceAllButton_.disabled = true;
@@ -491,7 +503,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
 
   /**
    * Trigger actions on Enter while in the replace with input or suggestions select.
-   * @param {goog.events.EventType.KEYUP} e The keyup event.
+   * @param {goog.events.KeyEvent} e The keyup event.
    * @private
    */
   SpellcheckAction.prototype.doActionOnEnter_ = function (e) {
