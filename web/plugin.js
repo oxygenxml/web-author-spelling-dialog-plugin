@@ -104,8 +104,8 @@ var spellingDialogActionId = 'Author/SpellingDialog';
      'com.oxygenxml.webapp.plugins.spellcheck.GoToNextSpellingErrorOperation', {
         params: {ignoredWords: this.editor_.getSpellChecker().getIgnoredWords()}
      })
-       .then(resultString => this.processNextProblemFindResult_(resultString))
-       .catch(err => this.handleSpellCheckOperationError_(err));
+       .then(this.processNextProblemFindResult_.bind(this))
+       .catch(this.handleSpellCheckOperationError_.bind(this));
  };
 
   /**
@@ -306,19 +306,30 @@ var spellingDialogActionId = 'Author/SpellingDialog';
       var buttonType = goog.dom.dataset.get(button, 'spButton');
       if (buttonType === 'ignore') {
         // just go to next marker.
-        this.ignore_();
+        this.scheduleDocumentTransaction_(this.ignore_, this);
       } else if (buttonType === 'ignore_all') {
-        var language = this.language_;
-        var word = this.word_;
-        // Add the word to the ignore list for the language.
-        this.editor_.getSpellChecker().addIgnoredWord(language, word);
-        this.findNext();
+        this.scheduleDocumentTransaction_(this.ignoreAll_, this);
       } else if (buttonType === 'replace') {
-        this.replace_();
+        this.scheduleDocumentTransaction_(this.replace_, this);
       } else if (buttonType === 'replace_all') {
-        this.replace_(true);
+        this.scheduleDocumentTransaction_(function() {
+          this.replace_(true)
+        }, this);
       }
     }
+  };
+
+  /**
+   * Ignore all occurences of the word.
+   * @return {Promise}
+   * @private
+   */
+  SpellcheckAction.prototype.ignoreAll_ = function () {
+    var language = this.language_;
+    var word = this.word_;
+    // Add the word to the ignore list for the language.
+    this.editor_.getSpellChecker().addIgnoredWord(language, word);
+    return this.findNext();
   };
 
   /**
@@ -331,8 +342,8 @@ var spellingDialogActionId = 'Author/SpellingDialog';
       'com.oxygenxml.webapp.plugins.spellcheck.IgnoreCurrentAndFindNextSpellingOperation', {
         params: {ignoredWords: this.editor_.getSpellChecker().getIgnoredWords()}
       })
-        .then(resultString => this.processNextProblemFindResult_(resultString))
-        .catch(err => this.handleSpellCheckOperationError_(err));
+        .then(this.processNextProblemFindResult_.bind(this))
+        .catch(this.handleSpellCheckOperationError_.bind(this));
   };
 
   /**
@@ -351,16 +362,17 @@ var spellingDialogActionId = 'Author/SpellingDialog';
             ignoredWords: this.editor_.getSpellChecker().getIgnoredWords()
           }
       })
-        .then(resultString => {
+        .then(function(resultString) {
           /** @type {{wordChanged: boolean=}} */
           var result = resultString ? JSON.parse(resultString) : {};
           if (result.wordChanged) {
-            return this.showChangedWordWarning_();
+            return this.showChangedWordWarning_()
+                .then(this.findNext.bind(this));
           } else {
             this.processNextProblemFindResult_(resultString);
           }
-        })
-        .catch(err => this.handleSpellCheckOperationError_(err));
+        }.bind(this))
+        .catch(this.handleSpellCheckOperationError_.bind(this));
   };
 
   /**
@@ -369,9 +381,8 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    */
   SpellcheckAction.prototype.showChangedWordWarning_ = function () {
     return Promise.resolve()
-        .then(() => this.createChangedWordWarningDialog_())
-        .then(dialog => this.waitForDialogSelect_(dialog))
-        .then(() => this.findNext());
+        .then(this.createChangedWordWarningDialog_.bind(this))
+        .then(this.waitForDialogSelect_.bind(this))
   };
 
   /**
@@ -400,7 +411,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
     SpellcheckAction.prototype.waitForDialogSelect_ = function (dialog) {
       return new Promise(function(resolve) {
         dialog.show();
-        dialog.onSelect(() => {
+        dialog.onSelect(function() {
           resolve();
           dialog.dispose();
         });
@@ -481,7 +492,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    */
   SpellcheckAction.prototype.beforeHide_ = function () {
     // Save dialog sizes and position for the next time it gets shown.
-    this.clearSpellcheckContextInformation_();
+    this.scheduleDocumentTransaction_(this.clearSpellcheckContextInformation_, this);
     this.dialogOpenHandler_.removeAll();
   };
 
@@ -512,10 +523,10 @@ var spellingDialogActionId = 'Author/SpellingDialog';
       var disableButtons = false;
       if (this.replaceButton_.disabled === false) {
         disableButtons = true;
-        this.replace_();
+        this.scheduleDocumentTransaction_(this.replace_, this);
       } else if (this.ignoreButton_.disabled === false) {
         disableButtons = true;
-        this.findNext();
+        this.scheduleDocumentTransaction_(this.findNext, this);
       }
       if (disableButtons) {
         this.setSpellCheckButtonsEnabled_(false);
@@ -523,10 +534,22 @@ var spellingDialogActionId = 'Author/SpellingDialog';
     }
   };
 
+  /**
+   * Schedule a document transaction.
+   * @param {function():Promise} transaction The transaction to execute.
+   * @param {object} context The context object.
+   * @private
+   */
+  SpellcheckAction.prototype.scheduleDocumentTransaction_ = function (transaction, context) {
+    this.editor_.getEditingSupport().scheduleDocumentTransaction(function() {
+      return transaction.call(context)
+    });
+  };
+
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
    this.showDialog_();
-   this.findNext();
+   this.scheduleDocumentTransaction_(this.findNext, this);
    callback && callback();
  };
 
