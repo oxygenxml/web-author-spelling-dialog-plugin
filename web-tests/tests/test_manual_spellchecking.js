@@ -53,6 +53,17 @@ describe('ManualSpellcheckingTest', function() {
     })
   });
 
+  it('findNext should resolve the promise when a problem was found', function (done) {
+    let editor = stubEditor();
+
+    let respose = JSON.stringify({word: 'xxx', suggestions: ['yyy']});
+    editor.getEditingSupport().getOperationsInvoker()
+        .invoke.returns(Promise.resolve(respose));
+    let manSpAction = new SpellcheckAction(editor);
+    manSpAction.showDialog_();
+    manSpAction.findNext().then(() => done());
+  });
+
   function getWarnDialog() {
     let warnElement = document.getElementById('word-changed-warn-container');
     return goog.dom.getAncestorByClass(warnElement, 'modal-dialog');
@@ -71,7 +82,10 @@ describe('ManualSpellcheckingTest', function() {
     sinon.stub(editor, "getSpellChecker").returns(spellChecker);
     sinon.stub(editor, "getActionsManager").returns(new sync.api.ActionsManager());
     sinon.stub(editor, "getEditingSupport").returns(stubEditingSupport());
-    sinon.stub(editor, "getSelectionManager").returns(new sync.api.SelectionManager());
+    let selectionManager = new sync.api.SelectionManager();
+    selectionManager.evalSelectionFunction = goog.functions.FALSE;
+    sinon.stub(editor, "getSelectionManager").returns(selectionManager);
+    sinon.stub(editor, "getReadOnlyState").returns({readOnly:false});
     return editor;
   }
 

@@ -285,11 +285,12 @@ var spellingDialogActionId = 'Author/SpellingDialog';
   /**
    * Clear spellcheck context information.
    *
+   * @return {Promise} when the spellcheck information is cleared from the server.
+   *
    * @private
    */
   SpellcheckAction.prototype.clearSpellcheckContextInformation_ = function() {
-    // noinspection JSIgnoredPromiseFromCall
-    this.operationsInvoker_.invoke(
+    return this.operationsInvoker_.invoke(
         'com.oxygenxml.webapp.plugins.spellcheck.ClearSpellingContextInformationOperation',
         {params: {}});
   };
@@ -451,7 +452,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
       }
       // If selection is now in readonly content, disable replace buttons.
       this.setSpellCheckButtonsEnabled_(true);
-      var editorReadOnlyStatus = this.editor_.getReadOnlyStatus().isReadOnly();
+      var editorReadOnlyStatus = this.editor_.getReadOnlyState().readOnly;
       var selectionInReadOnlyContent = this.editor_.getSelectionManager().evalSelectionFunction(sync.util.isInReadOnlyContent);
       if (editorReadOnlyStatus || selectionInReadOnlyContent) {
         this.replaceButton_.disabled = true;
