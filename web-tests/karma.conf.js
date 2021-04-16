@@ -26,13 +26,22 @@ module.exports = function(config) {
     colors: true,
     logLevel: config.LOG_INFO,
 
-    reporters: ['mocha'],
+    reporters: ['mocha', 'coverage'],
 
     plugins: [
       'karma-chrome-launcher',
       'karma-mocha',
       'karma-mocha-reporter',
+      'karma-coverage',
       'karma-chai',
-      'karma-sinon']
+      'karma-sinon'],
+
+    preprocessors: {
+      '../web/*.js': ['coverage']
+    },
+    coverageReporter: {
+      type : 'lcov',
+      dir : '../target/coverage/'
+    }
   });
 };
