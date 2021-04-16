@@ -1,11 +1,27 @@
 describe('ManualSpellcheckingTest', function() {
+  let manSpAction;
+
+  afterEach(() => {
+    manSpAction.dispose();
+  });
+
   it('action should call callback immediately', function (done) {
     let editor = stubEditor();
-    let manSpAction = new SpellcheckAction(editor);
+    manSpAction = new SpellcheckAction(editor);
     let cb = sinon.spy();
     manSpAction.actionPerformed(cb);
     assert(cb.callCount === 1);
     done();
+  });
+
+  it('action should call callback before scheduling a transaction', function (done) {
+    let editor = stubEditor();
+    manSpAction = new SpellcheckAction(editor);
+
+    manSpAction.actionPerformed(function() {
+      assert(editor.getEditingSupport().scheduleDocumentTransaction.callCount === 0);
+      done();
+    });
   });
 
   it('ignore should resolve the promise', function (done) {
@@ -13,7 +29,7 @@ describe('ManualSpellcheckingTest', function() {
     editor.getEditingSupport().getOperationsInvoker()
         .invoke.returns(Promise.resolve());
 
-    let manSpAction = new SpellcheckAction(editor);
+    manSpAction = new SpellcheckAction(editor);
     manSpAction.ignore_().then(() => done())
   });
 
@@ -22,7 +38,7 @@ describe('ManualSpellcheckingTest', function() {
     editor.getEditingSupport().getOperationsInvoker()
         .invoke.returns(Promise.resolve());
 
-    let manSpAction = new SpellcheckAction(editor);
+    manSpAction = new SpellcheckAction(editor);
     manSpAction.ignoreAll_().then(() => done())
   });
 
@@ -31,7 +47,7 @@ describe('ManualSpellcheckingTest', function() {
 
     editor.getEditingSupport().getOperationsInvoker()
         .invoke.returns(Promise.resolve());
-    let manSpAction = new SpellcheckAction(editor);
+    manSpAction = new SpellcheckAction(editor);
     manSpAction.showDialog_();
     manSpAction.replace_().then(() => done());
   });
@@ -42,7 +58,7 @@ describe('ManualSpellcheckingTest', function() {
     let wordChangedResult = JSON.stringify({wordChanged: true});
     editor.getEditingSupport().getOperationsInvoker()
         .invoke.returns(Promise.resolve(wordChangedResult));
-    let manSpAction = new SpellcheckAction(editor);
+    manSpAction = new SpellcheckAction(editor);
     manSpAction.showDialog_();
     manSpAction.replace_()
         .then(() => done());
@@ -59,10 +75,39 @@ describe('ManualSpellcheckingTest', function() {
     let respose = JSON.stringify({word: 'xxx', suggestions: ['yyy']});
     editor.getEditingSupport().getOperationsInvoker()
         .invoke.returns(Promise.resolve(respose));
-    let manSpAction = new SpellcheckAction(editor);
+    manSpAction = new SpellcheckAction(editor);
     manSpAction.showDialog_();
     manSpAction.findNext().then(() => done());
   });
+
+  it('should call findNext on enter', function (done) {
+    let editor = stubEditor();
+
+    manSpAction = new SpellcheckAction(editor);
+    manSpAction.showDialog_();
+
+    let respose = JSON.stringify({word: 'xxx', suggestions: ['yyy']});
+    editor.getEditingSupport().getOperationsInvoker()
+        .invoke.returns(Promise.resolve(respose));
+    manSpAction.findNext()
+        .then(() => {
+          var replaceInput = manSpAction.replaceInput_;
+          replaceInput.dispatchEvent(createEnterEvent());
+
+          // The replace input should not be disabled immediately.
+          assert(replaceInput.disabled === false);
+
+          // But the replace action was dispatched.
+          assert(editor.getEditingSupport().scheduleDocumentTransaction.callCount === 1)
+        })
+        .finally(() => done());
+  });
+
+  function createEnterEvent() {
+    let event = new CustomEvent('keyup');
+    event.keyCode = goog.events.KeyCodes.ENTER;
+    return event;
+  }
 
   function getWarnDialog() {
     let warnElement = document.getElementById('word-changed-warn-container');
@@ -97,7 +142,7 @@ describe('ManualSpellcheckingTest', function() {
         null, null, document.createElement('div'), {});
     let opsInvoker = {invoke: sinon.stub()};
     editingSupport.getOperationsInvoker = sinon.stub().returns(opsInvoker);
-    editingSupport.scheduleDocumentTransaction = goog.nullFunction;
+    editingSupport.scheduleDocumentTransaction = sinon.stub();
     return editingSupport;
   }
 });

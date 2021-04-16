@@ -491,8 +491,8 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    * @private
    */
   SpellcheckAction.prototype.beforeHide_ = function () {
-    this.clearSpellcheckContextInformation_()
-        .catch(console.warn);
+    // noinspection JSIgnoredPromiseFromCall
+    this.clearSpellcheckContextInformation_();
     this.dialogOpenHandler_.removeAll();
   };
 
