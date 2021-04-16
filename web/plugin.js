@@ -550,8 +550,8 @@ var spellingDialogActionId = 'Author/SpellingDialog';
  // The actual action execution.
  SpellcheckAction.prototype.actionPerformed = function(callback) {
    this.showDialog_();
-   this.scheduleDocumentTransaction_(this.findNext, this);
    callback && callback();
+   this.scheduleDocumentTransaction_(this.findNext, this);
  };
 
   /**
