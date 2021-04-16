@@ -292,7 +292,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
   SpellcheckAction.prototype.clearSpellcheckContextInformation_ = function() {
     return this.operationsInvoker_.invoke(
         'com.oxygenxml.webapp.plugins.spellcheck.ClearSpellingContextInformationOperation',
-        {params: {}});
+        {params: {}, options: {background: true}});
   };
 
   /**
@@ -492,8 +492,8 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    * @private
    */
   SpellcheckAction.prototype.beforeHide_ = function () {
-    // Save dialog sizes and position for the next time it gets shown.
-    this.scheduleDocumentTransaction_(this.clearSpellcheckContextInformation_, this);
+    this.clearSpellcheckContextInformation_()
+        .catch(console.warn);
     this.dialogOpenHandler_.removeAll();
   };
 
