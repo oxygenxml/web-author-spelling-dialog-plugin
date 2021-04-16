@@ -303,7 +303,6 @@ var spellingDialogActionId = 'Author/SpellingDialog';
   SpellcheckAction.prototype.clickOnButtons_ = function (e) {
     var button = goog.dom.getAncestorByClass(e.target, 'man-sp-button');
     if (button) {
-      this.setSpellCheckButtonsEnabled_(false);
       var buttonType = goog.dom.dataset.get(button, 'spButton');
       if (buttonType === 'ignore') {
         // just go to next marker.
@@ -521,16 +520,10 @@ var spellingDialogActionId = 'Author/SpellingDialog';
   SpellcheckAction.prototype.doActionOnEnter_ = function (e) {
     // On Enter do Replace if enabled, Ignore otherwise.
     if (e.keyCode === goog.events.KeyCodes.ENTER) {
-      var disableButtons = false;
       if (this.replaceButton_.disabled === false) {
-        disableButtons = true;
         this.scheduleDocumentTransaction_(this.replace_, this);
       } else if (this.ignoreButton_.disabled === false) {
-        disableButtons = true;
         this.scheduleDocumentTransaction_(this.findNext, this);
-      }
-      if (disableButtons) {
-        this.setSpellCheckButtonsEnabled_(false);
       }
     }
   };
@@ -543,8 +536,9 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    */
   SpellcheckAction.prototype.scheduleDocumentTransaction_ = function (transaction, context) {
     this.editor_.getEditingSupport().scheduleDocumentTransaction(function() {
-      return transaction.call(context)
-    });
+      this.setSpellCheckButtonsEnabled_(false);
+      return transaction.call(context);
+    }.bind(this));
   };
 
  // The actual action execution.
