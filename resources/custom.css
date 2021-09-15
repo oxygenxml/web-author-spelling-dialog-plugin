@@ -38,7 +38,10 @@
 }
 
 .man-sp-button.oxy-button {
-  margin: 0 0 10px 10px;
+  margin: 0 0 10px 20px;
+}
+.man-sp-divider {
+  margin-bottom: 10px;
 }
 
 .man-sp-button.oxy-button[disabled] {

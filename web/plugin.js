@@ -228,6 +228,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
      this.replaceButton_,
      this.replaceAllButton_,
+     createDom('div', 'man-sp-divider'),
      this.ignoreButton_,
      ignoreAllButton
    );
