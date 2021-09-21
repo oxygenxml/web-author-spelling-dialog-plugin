@@ -223,7 +223,8 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    var ignoreAllButton = this.createButton_('ignore_all', tr(msgs.IGNORE_ALL_));
    this.replaceButton_ = this.createButton_('replace', tr(msgs.REPLACE_));
    this.replaceAllButton_ = this.createButton_('replace_all', tr(msgs.REPLACE_ALL_));
-
+   
+   goog.dom.classlist.add(this.replaceButton_, 'oxy-button--primary');
 
    var buttonsColumn = createDom('div', 'man-sp-col man-buttons',
      this.replaceButton_,
