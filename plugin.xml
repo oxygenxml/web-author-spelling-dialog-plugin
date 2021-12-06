@@ -8,7 +8,7 @@
     name="Web Author Spelling Dialog Plugin"
     description="A plugin for Oxygen XML Web Author that adds a spelling dialog."
     version="${project.nosnapshot.version}"
-    vendor="SyncroSoft SRL">
+    vendor="Syncro Soft">
 
   <runtime>
     <librariesFolder name="lib" />
