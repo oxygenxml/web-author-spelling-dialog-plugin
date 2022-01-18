@@ -46,6 +46,7 @@
     </file>
     <file>
       <source>LICENSE</source>
+      <filtered>true</filtered>
     </file>
   </files>
 
