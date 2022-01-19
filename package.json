@@ -4,6 +4,7 @@
   "description": "This plugin adds a spellchecking dialog to Oxygen XML Web Author.",
   "main": "gulpfile.js",
   "scripts": {
+    "build": "wa-plugin-pack",
     "test": "karma start web-tests/karma.conf.js"
   },
   "repository": {
