@@ -5,14 +5,12 @@ import java.util.Optional;
 
 import javax.swing.text.BadLocationException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
 import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckWordInfo;
 
+import lombok.extern.slf4j.Slf4j;
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
@@ -31,11 +29,8 @@ import ro.sync.ecss.extensions.api.webapp.WebappSpellchecker;
  * @author ctalau
  */
 @WebappRestSafe
+@Slf4j
 public class GoToNextSpellingErrorOperation extends AuthorOperationWithResult {
-  /**
-   * Logger.
-   */
-  Logger logger = LogManager.getLogger(GoToNextSpellingErrorOperation.class);
 
   @Override
   public String doOperation(AuthorDocumentModel docModel, ArgumentsMap args) 

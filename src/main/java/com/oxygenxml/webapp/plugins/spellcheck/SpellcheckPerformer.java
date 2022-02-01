@@ -7,27 +7,22 @@ import java.util.Optional;
 
 import javax.swing.text.BadLocationException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.google.common.base.MoreObjects;
 
+import lombok.extern.slf4j.Slf4j;
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
 import ro.sync.ecss.extensions.api.SpellCheckingProblemInfo;
 import ro.sync.ecss.extensions.api.webapp.WebappSpellchecker;
 import ro.sync.exml.workspace.api.util.TextChunkDescriptor;
 
-import com.google.common.base.MoreObjects;
-
 /**
  * Class used to spellcheck an interval.
  * 
  * @author ctalau
  */
+@Slf4j
 public class SpellcheckPerformer {
-  /**
-   * Logger.
-   */
-  Logger logger = LogManager.getLogger(SpellcheckPerformer.class);
   
   /**
    * Spellchecker.
@@ -71,7 +66,7 @@ public class SpellcheckPerformer {
    */
   public Optional<SpellCheckingProblemInfo> runSpellcheck(
       int startOffset, int endOffset, AuthorDocumentController controller) throws AuthorOperationException {
-    logger.debug("Checking between " + startOffset + " " + endOffset);
+    log.debug("Checking between " + startOffset + " " + endOffset);
     int interval = 1000;
     
     int currentOffset = startOffset;
@@ -80,7 +75,7 @@ public class SpellcheckPerformer {
       Optional<SpellCheckingProblemInfo> nextProblem = 
           runSpellcheckSingleInterval(currentOffset, intervalEnd, controller);
       if (nextProblem.isPresent()) {
-        logger.debug("Found: " + nextProblem.get().getWord());
+        log.debug("Found: " + nextProblem.get().getWord());
         return nextProblem;
       }
       currentOffset = Math.min(currentOffset + interval, endOffset);
@@ -102,7 +97,7 @@ public class SpellcheckPerformer {
    */
   private Optional<SpellCheckingProblemInfo> runSpellcheckSingleInterval(
       int start, int end, AuthorDocumentController controller) throws AuthorOperationException {
-    logger.debug("Checking interval between " + start + " " + end);
+    log.debug("Checking interval between " + start + " " + end);
 
     // Run spellcheck on a slightly larger interval and ignore problems
     // at the boundaries - they may be caused by truncated words.

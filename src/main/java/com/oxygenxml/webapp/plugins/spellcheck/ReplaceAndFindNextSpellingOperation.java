@@ -4,9 +4,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
+import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckWordInfo;
 
+import lombok.extern.slf4j.Slf4j;
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
 import ro.sync.ecss.extensions.api.access.EditingSessionContext;
@@ -15,21 +16,15 @@ import ro.sync.ecss.extensions.api.webapp.AuthorOperationWithResult;
 import ro.sync.ecss.extensions.api.webapp.WebappRestSafe;
 import ro.sync.ecss.extensions.api.webapp.findreplace.WebappFindOptions;
 
-import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckContext;
-import com.oxygenxml.webapp.plugins.spellcheck.context.SpellcheckWordInfo;
-
 /**
  * Replace current spelling error and find next problem.
  * 
  * @author mihaela
  */
 @WebappRestSafe
+@Slf4j
 public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResult {
-  /**
-   * Logger.
-   */
-  private Logger logger = LogManager.getLogger(ReplaceAndFindNextSpellingOperation.class);
-  
+
   /**
    * Attribute name for the "replace all" option.
    */
@@ -93,7 +88,7 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
           endPosition.getOffset() - startPosition.getOffset() + 1, chars);
       oldWord = chars.toString();
     } catch (BadLocationException e) {
-      logger.error(e);
+      log.error(e);
     }
     return oldWord;
   }
