@@ -185,7 +185,7 @@ var spellingDialogActionId = 'Author/SpellingDialog';
    * @private
    */
   SpellcheckAction.prototype.createButton_ = function (name, caption) {
-    var button = goog.dom.createDom('button', { className: 'man-sp-button oxy-button oxy-small-button' }, caption);
+    var button = goog.dom.createDom('button', { className: 'man-sp-button oxy-button oxy-button--small' }, caption);
     goog.dom.dataset.set(button, 'spButton', name);
     return button;
   };
