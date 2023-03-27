@@ -11,7 +11,7 @@
   <key value="ERROR_COMMUNICATING_WITH_SERVER_">
     <comment>Message displayed when the replace or find next problem operations throw errors on the server.</comment>
     <val lang="en_US">The operation cannot be performed because there was a problem communicating with the server. Please try again later.</val>
-    <val lang="de_DE">Die Operating kann nicht ausgeführt werden, da ein Kommunikationsproblem mit dem Server vorliegt. Bitte versuchen Sie es später erneut.</val>
+    <val lang="de_DE">Die Operation kann nicht ausgeführt werden, da ein Kommunikationsproblem mit dem Server vorliegt. Bitte versuchen Sie es später erneut.</val>
     <val lang="fr_FR">L'opération ne peut pas être effectuée car il y a eu un problème de communication avec le serveur. Veuillez réessayer plus tard.</val>
     <val lang="ja_JP">サーバーとの通信に問題があるため、操作を実行できません。後で、再試行してください。</val>
     <val lang="nl_NL">De bewerking kan niet worden uitgevoerd omdat er een probleem is opgetreden in de communicatie met de server. Probeer het later opnieuw.</val>
