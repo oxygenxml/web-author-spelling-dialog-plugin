@@ -86,11 +86,26 @@ public class ReplaceAndFindNextSpellingOperation extends AuthorOperationWithResu
       Segment chars = new Segment();
       model.getAuthorDocumentController().getChars(startPosition.getOffset(), 
           endPosition.getOffset() - startPosition.getOffset() + 1, chars);
-      oldWord = chars.toString();
+      oldWord = cleanSentinelsInText(chars);
     } catch (BadLocationException e) {
       log.error(e);
     }
     return oldWord;
+  }
+
+  /**
+   * Remove the sentinel '\0' markers from the given text.
+   * @param chars the text to process.
+   * @return the cleaned text without sentinels.
+   */
+  private String cleanSentinelsInText(Segment chars) {
+    StringBuilder builder = new StringBuilder("");
+    for (int i = 0; i < chars.length(); i++) {
+      if (chars.charAt(i) != 0) {
+        builder.append(chars.charAt(i));
+      }
+    }
+    return builder.toString();
   }
 
   /**
