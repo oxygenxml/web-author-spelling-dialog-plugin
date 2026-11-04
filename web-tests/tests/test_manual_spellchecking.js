@@ -135,11 +135,11 @@ describe('ManualSpellcheckingTest', function() {
   }
 
   /**
-   * @return {sync.support.BasicAuthorSupport} a stub editing support.
+   * @return {sync.api.AuthorEditingSupport} a stub editing support.
    */
   function stubEditingSupport() {
-    let editingSupport = new sync.support.BasicAuthorSupport(
-        null, null, document.createElement('div'), {});
+    let editingSupport = new sync.api.AuthorEditingSupport({});
+    editingSupport.getType = () => sync.api.Editor.EditorTypes.AUTHOR;
     let opsInvoker = {invoke: sinon.stub()};
     editingSupport.getOperationsInvoker = sinon.stub().returns(opsInvoker);
     editingSupport.scheduleDocumentTransaction = sinon.stub();
